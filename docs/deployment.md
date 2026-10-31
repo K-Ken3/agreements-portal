@@ -15,3 +15,16 @@ Use the PowerShell commands in the repository README. The Docker Compose file st
 7. Do not enable external delivery, identity, or signature services without reviewed credentials and legal/operational approval.
 
 No hosting platform, region, provider credentials, or deployment automation is selected in this repository.
+
+## Vercel
+
+Vercel can build the Next.js application directly from the repository. Set `DATABASE_URL` (prefer a pooled serverless connection URL), `SESSION_SECRET`, and `APP_URL` in the project environment settings. The `postinstall` script generates the Prisma client.
+
+Apply migrations separately before the first deployment and after each reviewed migration:
+
+```powershell
+$env:DATABASE_URL="<production connection string>"
+npx prisma migrate deploy
+```
+
+Confirm that the database provider's region, backups, connection limits, and TLS settings meet the requirements above before accepting real user data.

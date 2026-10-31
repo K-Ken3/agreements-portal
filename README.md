@@ -50,6 +50,24 @@ The health endpoint is `GET /api/v1/health`. It reports database availability wi
 
 CI in [`.github/workflows/ci.yml`](./.github/workflows/ci.yml) applies the committed migration to PostgreSQL 16, then runs lint, type checking, tests, and a production build.
 
+## Deploy to Vercel
+
+1. Import this repository in Vercel; the framework preset is detected automatically.
+2. Add these environment variables for Production, Preview, and Development:
+   - `DATABASE_URL`: a hosted PostgreSQL connection string. Prefer the provider's pooled connection URL for serverless use.
+   - `SESSION_SECRET`: a random value of at least 32 characters.
+   - `APP_URL`: the deployed URL, for example `https://your-project.vercel.app`.
+3. Apply the database migration once against the production database:
+
+   ```powershell
+   $env:DATABASE_URL="<production connection string>"
+   npx prisma migrate deploy
+   ```
+
+4. Deploy. `npm run postinstall` generates the Prisma client during the Vercel build.
+
+The database must be reachable from Vercel and allow TLS. Do not commit `.env` or production credentials.
+
 ## Configuration
 
 See [.env.example](./.env.example). Production must use a managed secret store, HTTPS, a managed PostgreSQL deployment, reviewed data-location/subprocessor arrangements, backups, and a production-ready rate limiter. No SMS, email, identity, storage, or signing-provider credentials are needed or included in this MVP.
