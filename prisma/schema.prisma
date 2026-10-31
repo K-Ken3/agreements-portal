@@ -1,0 +1,119 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum AccountStatus {
+  ACTIVE
+  SUSPENDED
+}
+
+enum AgreementStatus {
+  DRAFT
+  INVITED
+  RECIPIENT_ACCESSED
+  DETAILS_PENDING
+  UNDER_REVIEW
+  CHANGES_REQUESTED
+  REJECTED
+  LOCKED_FOR_SIGNING
+  PARTIALLY_SIGNED
+  FINALIZING
+  FINALIZED
+  EXPIRED
+  CANCELLED
+  DISPUTED
+  SUPERSEDED
+}
+
+model User {
+  id              String      @id @default(uuid()) @db.Uuid
+  legalName       String      @map("legal_name")
+  email           String      @unique
+  normalizedEmail String      @unique @map("normalized_email")
+  passwordHash    String      @map("password_hash")
+  accountStatus   AccountStatus @default(ACTIVE) @map("account_status")
+  locale          String      @default("en")
+  createdAt       DateTime    @default(now()) @map("created_at")
+  updatedAt       DateTime    @updatedAt @map("updated_at")
+  sessions        Session[]
+  agreements      Agreement[] @relation("AgreementIssuer")
+  createdVersions AgreementVersion[] @relation("VersionCreator")
+  agreementEvents AgreementEvent[] @relation("AgreementEventActor")
+
+  @@map("users")
+}
+
+model Session {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  tokenHash String   @unique @map("token_hash")
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("sessions")
+}
+
+model Agreement {
+  id              String            @id @default(uuid()) @db.Uuid
+  publicReference String            @unique @map("public_reference")
+  issuerUserId    String            @map("issuer_user_id") @db.Uuid
+  title           String
+  category        String
+  description     String?
+  status          AgreementStatus   @default(DRAFT)
+  currency        String            @default("RWF")
+  effectiveDate   DateTime?         @map("effective_date") @db.Date
+  signingDeadline DateTime?         @map("signing_deadline") @db.Date
+  createdAt       DateTime          @default(now()) @map("created_at")
+  updatedAt       DateTime          @updatedAt @map("updated_at")
+  issuer          User              @relation("AgreementIssuer", fields: [issuerUserId], references: [id], onDelete: Restrict)
+  versions        AgreementVersion[]
+  events          AgreementEvent[]
+
+  @@index([issuerUserId, updatedAt])
+  @@index([status, updatedAt])
+  @@map("agreements")
+}
+
+model AgreementVersion {
+  id                  String    @id @default(uuid()) @db.Uuid
+  agreementId         String    @map("agreement_id") @db.Uuid
+  versionNumber       Int       @map("version_number")
+  canonicalContent    Json      @map("canonical_content_json")
+  contentHash         String    @map("content_hash")
+  canonicalization    String    @default("json-c14n-v1")
+  isLocked            Boolean   @default(false) @map("is_locked")
+  createdBy           String    @map("created_by") @db.Uuid
+  createdAt           DateTime  @default(now()) @map("created_at")
+  lockedAt            DateTime? @map("locked_at")
+  agreement           Agreement @relation(fields: [agreementId], references: [id], onDelete: Restrict)
+  creator             User      @relation("VersionCreator", fields: [createdBy], references: [id], onDelete: Restrict)
+
+  @@unique([agreementId, versionNumber])
+  @@index([agreementId, createdAt])
+  @@map("agreement_versions")
+}
+
+model AgreementEvent {
+  id               String    @id @default(uuid()) @db.Uuid
+  agreementId      String    @map("agreement_id") @db.Uuid
+  actorUserId      String?   @map("actor_user_id") @db.Uuid
+  eventType        String    @map("event_type")
+  payload          Json      @default("{}") @map("event_payload_minimized")
+  occurredAt       DateTime  @default(now()) @map("occurred_at")
+  previousEventHash String?  @map("previous_event_hash")
+  eventHash        String    @map("event_hash")
+  agreement        Agreement @relation(fields: [agreementId], references: [id], onDelete: Restrict)
+  actor            User?     @relation("AgreementEventActor", fields: [actorUserId], references: [id], onDelete: SetNull)
+
+  @@index([agreementId, occurredAt])
+  @@map("agreement_events")
+}

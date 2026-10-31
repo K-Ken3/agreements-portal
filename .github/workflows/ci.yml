@@ -1,0 +1,44 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: postgresql://agreements:agreements@localhost:5432/agreements?schema=public
+      SESSION_SECRET: ci-only-session-secret-0123456789abcdef0123456789abcdef
+      APP_URL: http://localhost:3000
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: agreements
+          POSTGRES_USER: agreements
+          POSTGRES_PASSWORD: agreements
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U agreements -d agreements"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run db:generate
+      - run: npm run db:deploy
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
