@@ -43,7 +43,7 @@ export default function NewAgreementPage() {
   return (
     <main className="app-shell">
       <aside className="sidebar">
-        <Link className="brand sidebar-brand" href="/dashboard"><span className="brand-mark">A</span><span>amasezerano</span></Link>
+        <Link className="brand sidebar-brand" href="/dashboard"><span>AgreeIt</span></Link>
         <span className="sidebar-label">WORKSPACE</span>
         <nav className="sidebar-nav" aria-label="Workspace"><Link className="sidebar-link" href="/dashboard"><span>▦</span> Overview</Link><a className="sidebar-link active" href="#agreement-form"><span>＋</span> New agreement</a></nav>
         <div className="sidebar-bottom"><div className="sidebar-help"><span>i</span><div><strong>Start with the essentials</strong><small>You can refine your draft later</small></div></div></div>

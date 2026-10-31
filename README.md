@@ -1,6 +1,6 @@
-# Amasezerano
+# AgreeIt
 
-Amasezerano is a Rwanda-first agreement workflow application. This repository contains the foundation and first working vertical slice: account registration/login, PostgreSQL-backed sessions, private draft creation, versioned draft content, and an authenticated agreement list/detail view.
+AgreeIt is a Rwanda-first agreement workflow application. This repository contains the foundation and first working vertical slice: account registration/login, PostgreSQL-backed sessions, private draft creation, versioned draft content, and an authenticated agreement list/detail view.
 
 > **MVP boundary:** This is not a production-ready signing service. Invitations, phone OTP, recipient participation, amendments, signatures, PDF generation, public verification, admin tools, and notification delivery are not implemented. Do not enter real national identity data or treat a draft as signed or legally approved.
 

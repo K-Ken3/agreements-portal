@@ -22,9 +22,8 @@ export default function HomePage() {
   return (
     <main>
       <header className="site-header">
-        <Link className="brand" href="/" aria-label="Amasezerano home">
-          <span className="brand-mark">A</span>
-          <span>amasezerano</span>
+        <Link className="brand" href="/" aria-label="AgreeIt home">
+          <span>AgreeIt</span>
         </Link>
         <nav className="site-nav" aria-label="Main navigation">
           <a href="#how-it-works">How it works</a>
@@ -64,7 +63,7 @@ export default function HomePage() {
           <div className="visual-orbit orbit-two" />
           <div className="document-card">
             <div className="document-top">
-              <span className="document-icon">A</span>
+              <span className="document-icon">▤</span>
               <span className="document-menu">•••</span>
             </div>
             <span className="document-label">AGREEMENT DRAFT</span>
@@ -119,7 +118,7 @@ export default function HomePage() {
       <section className="disclaimer-band">
         <span className="disclaimer-mark">i</span>
         <p>
-          Amasezerano helps parties organize agreements and records. It is not a law firm and
+          AgreeIt helps parties organize agreements and records. It is not a law firm and
           does not guarantee that an agreement is enforceable. Get qualified advice when needed.
         </p>
         <Link href="/terms">Learn more <span aria-hidden="true">→</span></Link>
@@ -127,7 +126,7 @@ export default function HomePage() {
 
       <footer className="site-footer">
         <Link className="brand footer-brand" href="/">
-          <span className="brand-mark">A</span><span>amasezerano</span>
+          <span>AgreeIt</span>
         </Link>
         <span className="footer-copy">A clearer way to make agreements.</span>
         <div className="footer-links">
@@ -135,7 +134,7 @@ export default function HomePage() {
           <Link href="/terms">Terms</Link>
           <Link href="/contact">Contact</Link>
         </div>
-        <span className="copyright">© 2026 Amasezerano</span>
+        <span className="copyright">© 2026 AgreeIt</span>
       </footer>
     </main>
   );

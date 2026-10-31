@@ -48,7 +48,7 @@ export default function AuthForm({ mode }: { mode: "login" | "register" }) {
         <div className="auth-decoration-lines" />
       </div>
       <Link className="brand auth-brand" href="/">
-        <span className="brand-mark">A</span><span>amasezerano</span>
+        <span>AgreeIt</span>
       </Link>
       <section className="auth-card">
         <span className="eyebrow">{isRegister ? "GET STARTED" : "WELCOME BACK"}</span>
@@ -88,7 +88,7 @@ export default function AuthForm({ mode }: { mode: "login" | "register" }) {
           </button>
         </form>
         <p className="auth-switch">
-          {isRegister ? "Already have an account?" : "New to Amasezerano?"}{" "}
+          {isRegister ? "Already have an account?" : "New to AgreeIt?"}{" "}
           <Link href={isRegister ? "/login" : "/register"}>
             {isRegister ? "Sign in" : "Create an account"}
           </Link>

@@ -46,7 +46,7 @@ export default function AgreementDetailsPage() {
 
   return (
     <main className="app-shell">
-      <aside className="sidebar"><Link className="brand sidebar-brand" href="/dashboard"><span className="brand-mark">A</span><span>amasezerano</span></Link><span className="sidebar-label">WORKSPACE</span><nav className="sidebar-nav"><Link className="sidebar-link" href="/dashboard"><span>▦</span> Overview</Link><Link className="sidebar-link active" href="/dashboard#agreements"><span>▤</span> Agreements</Link></nav></aside>
+      <aside className="sidebar"><Link className="brand sidebar-brand" href="/dashboard"><span>AgreeIt</span></Link><span className="sidebar-label">WORKSPACE</span><nav className="sidebar-nav"><Link className="sidebar-link" href="/dashboard"><span>▦</span> Overview</Link><Link className="sidebar-link active" href="/dashboard#agreements"><span>▤</span> Agreements</Link></nav></aside>
       <section className="dashboard-main">
         <header className="dashboard-topbar"><div className="breadcrumbs"><Link href="/dashboard">Workspace</Link><span>/</span><Link href="/dashboard#agreements">Agreements</Link><span>/</span><strong>Details</strong></div><Link className="button button-quiet" href="/dashboard">← Back to workspace</Link></header>
         <div className="details-content">

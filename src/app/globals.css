@@ -23,7 +23,6 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 
 .site-header { height: 82px; padding: 0 max(calc((100vw - 1200px) / 2), 5.2vw); display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #eff1ef; background: #fff; }
 .brand { display: inline-flex; align-items: center; gap: 10px; color: var(--navy); font-family: var(--font-display); font-size: 16px; font-weight: 800; letter-spacing: -.5px; }
-.brand-mark { width: 31px; height: 31px; display: inline-grid; place-items: center; border-radius: 9px; color: #fff; background: var(--teal); font-size: 16px; font-weight: 700; }
 .site-nav { display: flex; align-items: center; gap: 36px; margin-left: 60px; color: #57666e; font-size: 13px; font-weight: 600; }
 .site-nav a:hover, .footer-links a:hover { color: var(--teal); }
 .header-actions { display: flex; align-items: center; gap: 13px; }
@@ -99,7 +98,6 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 .disclaimer-band a { color: var(--teal); font-size: 11px; font-weight: 700; white-space: nowrap; }
 .site-footer { min-height: 94px; display: flex; align-items: center; gap: 18px; padding: 18px max(calc((100vw - 1200px) / 2), 5.2vw); border-top: 1px solid #edf0ed; }
 .footer-brand { font-size: 14px; }
-.footer-brand .brand-mark { width: 27px; height: 27px; font-size: 14px; }
 .footer-copy, .copyright { color: #9aa4a2; font-size: 10px; }
 .footer-links { display: flex; gap: 21px; margin-left: auto; color: #69767b; font-size: 10px; font-weight: 600; }
 .copyright { margin-left: 12px; }
@@ -130,7 +128,6 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 .app-shell { min-height: 100vh; display: flex; background: #f7f8f7; }
 .sidebar { position: sticky; top: 0; width: 246px; height: 100vh; display: flex; flex: 0 0 246px; flex-direction: column; padding: 26px 17px 16px; border-right: 1px solid #e9edeb; background: #fff; }
 .sidebar-brand { padding: 0 9px 31px; font-size: 15px; }
-.sidebar-brand .brand-mark { width: 29px; height: 29px; }
 .sidebar-label { padding: 0 11px; color: #a1aaa8; font-size: 9px; font-weight: 700; letter-spacing: 1.25px; }
 .sidebar-nav { display: flex; flex-direction: column; gap: 4px; margin-top: 13px; }
 .sidebar-link { min-height: 40px; display: flex; align-items: center; gap: 12px; padding: 0 11px; border-radius: 6px; color: #69777a; font-size: 12px; font-weight: 600; }
@@ -294,7 +291,6 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 @media (max-width: 700px) {
   .site-header { height: 67px; padding: 0 18px; }
   .site-header .brand { font-size: 14px; }
-  .brand-mark { width: 28px; height: 28px; }
   .site-nav { display: none; }
   .header-actions { gap: 4px; }
   .header-actions .button { min-height: 36px; padding: 0 11px; font-size: 10px; }

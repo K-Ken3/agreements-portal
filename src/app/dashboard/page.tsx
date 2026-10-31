@@ -73,7 +73,7 @@ export default function DashboardPage() {
     <main className="app-shell">
       <aside className="sidebar">
         <Link className="brand sidebar-brand" href="/">
-          <span className="brand-mark">A</span><span>amasezerano</span>
+          <span>AgreeIt</span>
         </Link>
         <span className="sidebar-label">WORKSPACE</span>
         <nav className="sidebar-nav" aria-label="Workspace">
@@ -145,7 +145,7 @@ export default function DashboardPage() {
               </div>
             )}
           </section>
-          <p className="dashboard-disclaimer">Amasezerano helps organize agreement workflows and records. It does not provide legal advice.</p>
+          <p className="dashboard-disclaimer">AgreeIt helps organize agreement workflows and records. It does not provide legal advice.</p>
         </div>
       </section>
     </main>
