@@ -55,18 +55,31 @@ CI in [`.github/workflows/ci.yml`](./.github/workflows/ci.yml) applies the commi
 1. Import this repository in Vercel; the framework preset is detected automatically.
 2. Add these environment variables for Production, Preview, and Development:
    - `DATABASE_URL`: a hosted PostgreSQL connection string. Prefer the provider's pooled connection URL for serverless use.
+   - `DIRECT_URL`: the direct/session connection string used by migrations.
    - `SESSION_SECRET`: a random value of at least 32 characters.
    - `APP_URL`: the deployed URL, for example `https://your-project.vercel.app`.
 3. Apply the database migration once against the production database:
 
    ```powershell
-   $env:DATABASE_URL="<production connection string>"
+   $env:DATABASE_URL="<production pooled connection string>"
+   $env:DIRECT_URL="<production direct connection string>"
    npx prisma migrate deploy
    ```
 
 4. Deploy. `npm run postinstall` generates the Prisma client during the Vercel build.
 
 The database must be reachable from Vercel and allow TLS. Do not commit `.env` or production credentials.
+
+### Supabase
+
+Use Supabase's connection details from **Project Settings → Database**:
+
+- `DATABASE_URL`: transaction pooler, port `6543`, for example
+  `postgresql://postgres.<project-ref>:<password>@aws-0-<region>.pooler.supabase.com:6543/postgres?pgbouncer=true&connection_limit=1`
+- `DIRECT_URL`: session pooler, port `5432`, for example
+  `postgresql://postgres.<project-ref>:<password>@aws-0-<region>.pooler.supabase.com:5432/postgres`
+
+URL-encode special characters in the password. Keep `sslmode=require` if your connection string does not already include it.
 
 ## Configuration
 

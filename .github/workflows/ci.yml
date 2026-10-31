@@ -13,6 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       DATABASE_URL: postgresql://agreements:agreements@localhost:5432/agreements?schema=public
+      DIRECT_URL: postgresql://agreements:agreements@localhost:5432/agreements?schema=public
       SESSION_SECRET: ci-only-session-secret-0123456789abcdef0123456789abcdef
       APP_URL: http://localhost:3000
     services:

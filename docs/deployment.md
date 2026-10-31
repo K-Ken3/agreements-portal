@@ -18,13 +18,16 @@ No hosting platform, region, provider credentials, or deployment automation is s
 
 ## Vercel
 
-Vercel can build the Next.js application directly from the repository. Set `DATABASE_URL` (prefer a pooled serverless connection URL), `SESSION_SECRET`, and `APP_URL` in the project environment settings. The `postinstall` script generates the Prisma client.
+Vercel can build the Next.js application directly from the repository. Set `DATABASE_URL` (pooled serverless connection), `DIRECT_URL` (migration connection), `SESSION_SECRET`, and `APP_URL` in the project environment settings. The `postinstall` script generates the Prisma client.
 
 Apply migrations separately before the first deployment and after each reviewed migration:
 
 ```powershell
-$env:DATABASE_URL="<production connection string>"
+$env:DATABASE_URL="<production pooled connection string>"
+$env:DIRECT_URL="<production direct connection string>"
 npx prisma migrate deploy
 ```
+
+For Supabase, use the transaction pooler on port `6543` with `pgbouncer=true&connection_limit=1` for `DATABASE_URL`, and the session pooler on port `5432` for `DIRECT_URL`. URL-encode special characters in the password.
 
 Confirm that the database provider's region, backups, connection limits, and TLS settings meet the requirements above before accepting real user data.
