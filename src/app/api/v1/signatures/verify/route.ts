@@ -42,6 +42,9 @@ export async function POST(request: NextRequest) {
   });
   const now = new Date();
   const version = signer?.agreement.versions[0];
+  const completedAgreementAccess = Boolean(
+    signer?.signedAt && signer.agreement.status === AgreementStatus.FINALIZED
+  );
   if (!parsed.data.code) {
     return NextResponse.json({ error: "Enter the six-digit code from your invitation email." }, { status: 400 });
   }
@@ -49,11 +52,12 @@ export async function POST(request: NextRequest) {
     !signer ||
     signer.role !== AgreementSignerRole.COUNTERPARTY ||
     !signer.invitationSentAt ||
-    !signer.invitationExpiresAt ||
-    signer.invitationExpiresAt <= now ||
-    signer.agreement.status !== AgreementStatus.LOCKED_FOR_SIGNING &&
-      signer.agreement.status !== AgreementStatus.PARTIALLY_SIGNED ||
-    signer.signedAt ||
+    (!completedAgreementAccess &&
+      (!signer.invitationExpiresAt ||
+        signer.invitationExpiresAt <= now ||
+        signer.agreement.status !== AgreementStatus.LOCKED_FOR_SIGNING &&
+          signer.agreement.status !== AgreementStatus.PARTIALLY_SIGNED ||
+        signer.signedAt)) ||
     !version?.isLocked ||
     !signer.otpHash ||
     !signer.otpExpiresAt ||
@@ -65,7 +69,11 @@ export async function POST(request: NextRequest) {
 
   if (!matchesSigningSecret("otp", parsed.data.code, signer.otpHash)) {
     await prisma.agreementSigner.updateMany({
-      where: { id: signer.id, otpAttempts: signer.otpAttempts, signedAt: null },
+      where: {
+        id: signer.id,
+        otpAttempts: signer.otpAttempts,
+        ...(completedAgreementAccess ? { signedAt: signer.signedAt } : { signedAt: null })
+      },
       data: { otpAttempts: { increment: 1 } }
     });
     return NextResponse.json({ error: "That verification code is not valid." }, { status: 400 });
@@ -77,9 +85,10 @@ export async function POST(request: NextRequest) {
     where: {
       id: signer.id,
       otpHash: signer.otpHash,
-      signedAt: null,
-      invitationExpiresAt: { gt: now },
-      otpAttempts: { lt: 5 }
+      otpAttempts: { lt: 5 },
+      ...(completedAgreementAccess
+        ? { signedAt: signer.signedAt }
+        : { signedAt: null, invitationExpiresAt: { gt: now } })
     },
     data: {
       otpHash: null,

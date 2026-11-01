@@ -32,15 +32,19 @@ export async function POST(request: NextRequest) {
     include: { agreement: { include: { issuer: { select: { legalName: true } } } } }
   });
   const now = new Date();
+  const completedAgreementAccess = Boolean(
+    signer?.signedAt && signer.agreement.status === AgreementStatus.FINALIZED
+  );
   if (
     !signer ||
     signer.role !== AgreementSignerRole.COUNTERPARTY ||
     !signer.invitationSentAt ||
-    !signer.invitationExpiresAt ||
-    signer.invitationExpiresAt <= now ||
-    signer.signedAt ||
-    signer.agreement.status !== AgreementStatus.LOCKED_FOR_SIGNING &&
-      signer.agreement.status !== AgreementStatus.PARTIALLY_SIGNED
+    (!completedAgreementAccess &&
+      (!signer.invitationExpiresAt ||
+        signer.invitationExpiresAt <= now ||
+        signer.signedAt ||
+        signer.agreement.status !== AgreementStatus.LOCKED_FOR_SIGNING &&
+          signer.agreement.status !== AgreementStatus.PARTIALLY_SIGNED))
   ) {
     return NextResponse.json({ error: "This signing invitation has expired or is no longer active." }, { status: 410 });
   }
@@ -56,8 +60,7 @@ export async function POST(request: NextRequest) {
     where: {
       id: signer.id,
       otpSendCount: signer.otpSendCount,
-      signedAt: null,
-      invitationExpiresAt: { gt: now }
+      ...(completedAgreementAccess ? {} : { signedAt: null, invitationExpiresAt: { gt: now } })
     },
     data: {
       otpHash: hashSigningSecret("otp", code),
@@ -79,7 +82,8 @@ export async function POST(request: NextRequest) {
       agreementTitle: signer.agreement.title,
       publicReference: signer.agreement.publicReference,
       invitationToken: parsed.data.token,
-      verificationCode: code
+      verificationCode: code,
+      completedAgreementAccess
     });
   } catch {
     console.error("Signing verification code could not be delivered.");

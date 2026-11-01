@@ -63,6 +63,7 @@ export async function sendSigningInvitation(input: {
   publicReference: string;
   invitationToken: string;
   verificationCode: string;
+  completedAgreementAccess?: boolean;
 }): Promise<void> {
   if (!isEmailDeliveryConfigured()) {
     throw new EmailDeliveryError("Email delivery is not configured.");
@@ -82,34 +83,43 @@ export async function sendSigningInvitation(input: {
       "\"": "&quot;",
       "'": "&#39;"
     })[character] ?? character);
+  const completedAgreementAccess = input.completedAgreementAccess ?? false;
+  const actionLabel = completedAgreementAccess
+    ? "Open your confirmed agreement"
+    : "Review and sign the agreement";
+  const expiryNotice = completedAgreementAccess
+    ? "This one-time code expires in 10 minutes."
+    : "The code expires in 10 minutes. The invitation expires in 7 days or on the agreement's signing deadline, whichever comes first.";
   const text = [
     `Hello ${input.signerName},`,
     "",
-    `${input.issuerName} invited you to review and sign "${input.agreementTitle}" (${input.publicReference}).`,
+    completedAgreementAccess
+      ? `The agreement "${input.agreementTitle}" (${input.publicReference}) is now complete.`
+      : `${input.issuerName} invited you to review and sign "${input.agreementTitle}" (${input.publicReference}).`,
     "",
-    `Review and sign the agreement: ${invitationUrl}`,
+    `${actionLabel}: ${invitationUrl}`,
     `Your one-time verification code is: ${input.verificationCode}`,
     "",
-    "The code expires in 10 minutes. The invitation expires in 7 days or on the agreement's signing deadline, whichever comes first.",
+    expiryNotice,
     "If you were not expecting this invitation, you can ignore this email."
   ].join("\n");
   const html = `
     <div style="max-width:560px;margin:0 auto;padding:32px 24px;color:#1d2b37;font-family:Arial,sans-serif">
       <img src="${logoUrl}" alt="AgreeIt" width="180" style="display:block;width:180px;height:auto;margin:0 0 28px" />
       <p>Hello ${escapeHtml(input.signerName)},</p>
-      <p>${escapeHtml(input.issuerName)} invited you to review and sign
-        <strong>${escapeHtml(input.agreementTitle)}</strong>
-        (${escapeHtml(input.publicReference)}).</p>
+      <p>${completedAgreementAccess
+        ? `Your agreement <strong>${escapeHtml(input.agreementTitle)}</strong> (${escapeHtml(input.publicReference)}) is complete and ready to view.`
+        : `${escapeHtml(input.issuerName)} invited you to review and sign <strong>${escapeHtml(input.agreementTitle)}</strong> (${escapeHtml(input.publicReference)}).`}</p>
       <table role="presentation" border="0" cellpadding="0" cellspacing="0" style="margin:24px 0">
         <tr>
           <td align="center" bgcolor="#087f43" style="border-radius:6px">
-            <a href="${escapeHtml(invitationUrl)}" style="display:inline-block;padding:14px 22px;border:1px solid #087f43;border-radius:6px;background-color:#087f43;color:#ffffff;font-family:Arial,sans-serif;font-size:16px;font-weight:bold;line-height:20px;text-align:center;text-decoration:none">Review and sign the agreement</a>
+            <a href="${escapeHtml(invitationUrl)}" style="display:inline-block;padding:14px 22px;border:1px solid #087f43;border-radius:6px;background-color:#087f43;color:#ffffff;font-family:Arial,sans-serif;font-size:16px;font-weight:bold;line-height:20px;text-align:center;text-decoration:none">${actionLabel}</a>
           </td>
         </tr>
       </table>
       <p>Your one-time verification code is:</p>
       <p style="font-size:24px;font-weight:bold;letter-spacing:5px">${escapeHtml(input.verificationCode)}</p>
-      <p style="color:#68777b;font-size:13px;line-height:1.6">The code expires in 10 minutes. The invitation expires in 7 days or on the agreement's signing deadline, whichever comes first.</p>
+      <p style="color:#68777b;font-size:13px;line-height:1.6">${expiryNotice}</p>
       <p style="color:#68777b;font-size:13px">If you were not expecting this invitation, you can ignore this email.</p>
     </div>`;
 
@@ -127,7 +137,9 @@ export async function sendSigningInvitation(input: {
       body: JSON.stringify({
         from: env.EMAIL_FROM,
         to: [input.email],
-        subject: `Review and sign: ${input.agreementTitle}`,
+        subject: completedAgreementAccess
+          ? `Your confirmed agreement: ${input.agreementTitle}`
+          : `Review and sign: ${input.agreementTitle}`,
         text,
         html
       }),

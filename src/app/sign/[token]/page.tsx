@@ -164,7 +164,29 @@ export default function SignAgreementPage() {
 
   const agreement = session?.agreement;
   const parties = agreement?.canonicalContent.parties;
-  const isComplete = signedStatus === "FINALIZED";
+  const hasSigned = Boolean(signedStatus || session?.signer.signedAt);
+  const isComplete =
+    signedStatus === "FINALIZED" || agreement?.status === "FINALIZED";
+
+  async function refreshAgreementStatus() {
+    setPending(true);
+    setError("");
+    try {
+      const response = await fetch(
+        `/api/v1/signatures/session?token=${encodeURIComponent(invitationToken)}`
+      );
+      const result = (await response.json()) as SigningSession & { error?: string };
+      if (!response.ok) {
+        setError(result.error ?? "The agreement status could not be refreshed.");
+        return;
+      }
+      setSession(result);
+    } catch {
+      setError("Connection problem. The agreement status could not be refreshed.");
+    } finally {
+      setPending(false);
+    }
+  }
 
   return (
     <main className="signing-page">
@@ -173,12 +195,35 @@ export default function SignAgreementPage() {
         <span className="eyebrow">PRIVATE SIGNING INVITATION</span>
       </header>
       <section className="signing-content">
-        {signedStatus ? (
+        {hasSigned ? (
           <div className="signing-card">
-            <span className="eyebrow">SIGNATURE RECORDED</span>
-            <h1>{isComplete ? "Agreement complete." : "You’ve signed."}</h1>
-            <p>{isComplete ? "Both parties have signed the same locked agreement version." : "Your signature is recorded. The agreement becomes final after the other party signs."}</p>
+            <span className="eyebrow">{isComplete ? "AGREEMENT FINALIZED" : "SIGNATURE RECORDED"}</span>
+            <h1>{isComplete ? "Your confirmed agreement is ready." : "You’ve signed."}</h1>
+            <p>{isComplete ? "Both parties have signed the same locked agreement version. You can now download or print your confirmed copy." : "Your signature is recorded. The agreement becomes final after the other party signs."}</p>
             {agreement && <p className="signing-reference">{agreement.publicReference} · {agreement.title}</p>}
+            {isComplete ? (
+              <>
+                <a
+                  className="button button-primary"
+                  href={`/api/v1/signatures/agreement?token=${encodeURIComponent(invitationToken)}`}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Download confirmed agreement
+                </a>
+                <p className="legal-note">A print-ready copy will open in a new tab. Choose “Print / Save as PDF” to save your agreement.</p>
+              </>
+            ) : (
+              <button
+                className="button button-primary"
+                type="button"
+                onClick={refreshAgreementStatus}
+                disabled={pending}
+              >
+                {pending ? "Checking…" : "Check if the agreement is complete"}
+              </button>
+            )}
+            {error && <p className="form-error" role="alert">{error}</p>}
             <p className="legal-note">This in-app signature is not a qualified digital signature or a guarantee of legal enforceability.</p>
           </div>
         ) : !session ? (

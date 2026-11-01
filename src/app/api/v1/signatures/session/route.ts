@@ -38,14 +38,17 @@ export async function GET(request: NextRequest) {
       }
     }
   });
+  const completedAgreementAccess = Boolean(
+    signer?.signedAt && signer.agreement.status === AgreementStatus.FINALIZED
+  );
   if (
     !signer ||
     signer.role !== AgreementSignerRole.COUNTERPARTY ||
     !signer.sessionExpiresAt ||
     signer.sessionExpiresAt <= new Date() ||
     !signer.verifiedAt ||
-    !signer.invitationExpiresAt ||
-    signer.invitationExpiresAt <= new Date()
+    (!completedAgreementAccess &&
+      (!signer.invitationExpiresAt || signer.invitationExpiresAt <= new Date()))
   ) {
     return NextResponse.json({ error: "Your signing session has expired. Verify your email again." }, { status: 401 });
   }
@@ -160,9 +163,7 @@ export async function POST(request: NextRequest) {
         data: {
           signedName: parsed.data.signedName,
           signedAt,
-          signedContentHash: version.contentHash,
-          sessionTokenHash: null,
-          sessionExpiresAt: null
+          signedContentHash: version.contentHash
         }
       });
       if (update.count !== 1) throw new Error("ALREADY_SIGNED");
@@ -190,15 +191,7 @@ export async function POST(request: NextRequest) {
       return { signedAt, status: nextStatus, contentHash: version.contentHash };
     }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable });
 
-    const response = NextResponse.json({ signature: result });
-    response.cookies.set(SESSION_COOKIE, "", {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      path: "/api/v1/signatures",
-      expires: new Date(0)
-    });
-    return response;
+    return NextResponse.json({ signature: result });
   } catch (error) {
     if (error instanceof Error) {
       const messages: Record<string, { message: string; status: number }> = {
