@@ -1,10 +1,14 @@
 import { describe, expect, it } from "vitest";
 import {
+  buildAgreementContent,
   canTransitionAgreement,
   canonicalize,
   createAgreementSchema,
   hashCanonicalContent,
-  hashAgreementEvent
+  hashAgreementEvent,
+  partiesSchema,
+  readAgreementParties,
+  updateAgreementSchema
 } from "./agreements";
 
 describe("agreement integrity helpers", () => {
@@ -32,6 +36,9 @@ describe("agreement integrity helpers", () => {
   it("allows only defined workflow transitions", () => {
     expect(canTransitionAgreement("draft", "invited")).toBe(true);
     expect(canTransitionAgreement("draft", "finalized")).toBe(false);
+    expect(canTransitionAgreement("locked_for_signing", "finalized")).toBe(false);
+    expect(canTransitionAgreement("partially_signed", "finalized")).toBe(true);
+    expect(canTransitionAgreement("draft", "rejected")).toBe(false);
     expect(canTransitionAgreement("finalized", "cancelled")).toBe(false);
   });
 
@@ -49,5 +56,48 @@ describe("agreement integrity helpers", () => {
     expect(parsed.signingDeadline).toBeUndefined();
     expect(createAgreementSchema.safeParse({ ...draft, effectiveDate: "2026-02-31" }).success).toBe(false);
     expect(createAgreementSchema.safeParse({ ...draft, effectiveDate: "2026-03-01" }).success).toBe(true);
+  });
+
+  it("normalises party details and rejects an invalid email", () => {
+    const parsed = partiesSchema.parse({
+      counterpartyName: "  Aline Uwase ",
+      counterpartyEmail: " ALINE@Example.COM ",
+      counterpartyOrganization: " Uwase Ltd "
+    });
+    expect(parsed).toEqual({
+      counterpartyName: "Aline Uwase",
+      counterpartyEmail: "aline@example.com",
+      counterpartyOrganization: "Uwase Ltd",
+      counterpartyRole: ""
+    });
+    expect(
+      partiesSchema.safeParse({ counterpartyName: "A", counterpartyEmail: "not-an-email" }).success
+    ).toBe(false);
+  });
+
+  it("builds version content with parties and reads them back", () => {
+    const details = createAgreementSchema.parse({
+      title: "Equipment rental",
+      category: "Rental",
+      clauses: "The equipment must be returned in good condition."
+    });
+    const parties = partiesSchema.parse({
+      counterpartyName: "Aline Uwase",
+      counterpartyEmail: "aline@example.com"
+    });
+    const content = buildAgreementContent(details, parties);
+
+    expect(content.parties).toEqual(parties);
+    expect(readAgreementParties(content)).toEqual(parties);
+    expect(readAgreementParties({ title: "No parties yet" })).toBeNull();
+  });
+
+  it("requires at least one section when updating a draft", () => {
+    expect(updateAgreementSchema.safeParse({}).success).toBe(false);
+    expect(
+      updateAgreementSchema.safeParse({
+        parties: { counterpartyName: "Aline Uwase", counterpartyEmail: "aline@example.com" }
+      }).success
+    ).toBe(true);
   });
 });

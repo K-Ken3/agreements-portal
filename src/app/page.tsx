@@ -9,12 +9,12 @@ const steps = [
   {
     number: "02",
     title: "Review together",
-    description: "Invite the other party to read the same document and discuss any changes."
+    description: "Email a private invitation so the other party can verify their address and review the locked version."
   },
   {
     number: "03",
-    title: "Keep a clear record",
-    description: "Track agreement activity and keep each version easy to identify."
+    title: "Sign the same version",
+    description: "Both parties type their names and sign the same locked version to complete the record."
   }
 ];
 
@@ -36,7 +36,7 @@ export default function HomePage() {
       </header>
 
       <div className="release-notice" role="status">
-        Early MVP: account access and private drafts are available; invitations and signing are not enabled yet.
+        Set out the terms, invite the other party, and capture both parties’ typed in-app signatures.
       </div>
 
       <section className="hero">
@@ -44,8 +44,8 @@ export default function HomePage() {
           <span className="eyebrow"><span className="eyebrow-dot" /> CLEAR TERMS. SHARED CONFIDENCE.</span>
           <h1>Agreements should feel <span>clear from the start.</span></h1>
           <p>
-            Bring the important details into one place. Create a draft, share it for review,
-            and keep a transparent record of what happens next.
+            Bring the important details into one place. Create a draft, invite the other party
+            to review and sign, and keep a record of each signature.
           </p>
           <div className="hero-actions">
             <Link className="button button-primary" href="/register">
@@ -101,7 +101,7 @@ export default function HomePage() {
       <section className="steps-section" id="how-it-works">
         <div className="section-heading">
           <span className="eyebrow">A THOUGHTFUL PROCESS</span>
-          <h2>From first draft to shared understanding.</h2>
+          <h2>From first draft to two-party signatures.</h2>
           <p>Keep the process straightforward, and make the next step clear for everyone involved.</p>
         </div>
         <div className="step-grid">

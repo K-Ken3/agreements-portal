@@ -19,15 +19,15 @@ export type AgreementState =
   | "superseded";
 
 const transitions: Record<AgreementState, readonly AgreementState[]> = {
-  draft: ["invited", "cancelled"],
+  draft: ["invited", "locked_for_signing", "cancelled"],
   invited: ["recipient_accessed", "expired", "cancelled", "rejected"],
   recipient_accessed: ["details_pending", "under_review", "changes_requested", "rejected", "expired"],
   details_pending: ["under_review", "changes_requested", "rejected", "expired"],
   under_review: ["changes_requested", "rejected", "locked_for_signing"],
   changes_requested: ["draft", "cancelled"],
   rejected: [],
-  locked_for_signing: ["partially_signed", "finalizing", "expired", "disputed"],
-  partially_signed: ["finalizing", "expired", "disputed"],
+  locked_for_signing: ["partially_signed", "expired", "disputed"],
+  partially_signed: ["finalized", "expired", "disputed"],
   finalizing: ["finalized", "disputed"],
   finalized: ["disputed", "superseded"],
   expired: [],
@@ -66,7 +66,7 @@ export function hashCanonicalContent(value: unknown): string {
 export function hashAgreementEvent(
   event: {
     agreementId: string;
-    actorUserId: string;
+    actorUserId: string | null;
     eventType: string;
     occurredAt: string;
     payload: unknown;
@@ -102,3 +102,61 @@ export const createAgreementSchema = z.object({
 });
 
 export type CreateAgreementInput = z.infer<typeof createAgreementSchema>;
+
+const emailSchema = z.preprocess(
+  (value) => (typeof value === "string" ? value.trim().toLowerCase() : value),
+  z.email().max(200)
+);
+
+export const partiesSchema = z.object({
+  counterpartyName: z.string().trim().min(2).max(120),
+  counterpartyEmail: emailSchema,
+  counterpartyOrganization: z.string().trim().max(120).optional().default(""),
+  counterpartyRole: z.string().trim().max(80).optional().default("")
+});
+
+export type AgreementParties = z.infer<typeof partiesSchema>;
+
+export type AgreementContent = {
+  title: string;
+  category: string;
+  description: string;
+  clauses: string;
+  currency: "RWF";
+  effectiveDate: string | null;
+  signingDeadline: string | null;
+  parties: AgreementParties | null;
+};
+
+export function buildAgreementContent(
+  details: CreateAgreementInput,
+  parties: AgreementParties | null
+): AgreementContent {
+  return {
+    title: details.title,
+    category: details.category,
+    description: details.description ?? "",
+    clauses: details.clauses,
+    currency: details.currency,
+    effectiveDate: details.effectiveDate ?? null,
+    signingDeadline: details.signingDeadline ?? null,
+    parties
+  };
+}
+
+export function readAgreementParties(content: unknown): AgreementParties | null {
+  if (!content || typeof content !== "object") return null;
+  const parsed = partiesSchema.safeParse((content as Record<string, unknown>).parties);
+  return parsed.success ? parsed.data : null;
+}
+
+export const updateAgreementSchema = z
+  .object({
+    details: createAgreementSchema.optional(),
+    parties: partiesSchema.optional()
+  })
+  .refine((value) => Boolean(value.details || value.parties), {
+    message: "Nothing to update."
+  });
+
+export type UpdateAgreementInput = z.infer<typeof updateAgreementSchema>;

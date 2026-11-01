@@ -68,6 +68,9 @@ export default function DashboardPage() {
 
   const draftCount = agreements.filter((agreement) => agreement.status === "DRAFT").length;
   const completedCount = agreements.filter((agreement) => agreement.status === "FINALIZED").length;
+  const pendingCount = agreements.filter((agreement) =>
+    agreement.status === "LOCKED_FOR_SIGNING" || agreement.status === "PARTIALLY_SIGNED"
+  ).length;
 
   return (
     <main className="app-shell">
@@ -110,7 +113,7 @@ export default function DashboardPage() {
             <article className="metric-card"><span className="metric-icon blue">▤</span><span className="metric-label">All agreements</span><strong>{loading ? "—" : agreements.length}</strong><small>Across your workspace</small></article>
             <article className="metric-card"><span className="metric-icon amber">◷</span><span className="metric-label">Drafts</span><strong>{loading ? "—" : draftCount}</strong><small>Ready when you are</small></article>
             <article className="metric-card"><span className="metric-icon green">✓</span><span className="metric-label">Completed</span><strong>{loading ? "—" : completedCount}</strong><small>Fully signed records</small></article>
-            <article className="metric-card"><span className="metric-icon slate">↔</span><span className="metric-label">Waiting on others</span><strong>0</strong><small>No pending invitations</small></article>
+            <article className="metric-card"><span className="metric-icon slate">↔</span><span className="metric-label">Awaiting signatures</span><strong>{loading ? "—" : pendingCount}</strong><small>Invited or partly signed</small></article>
           </div>
 
           <section className="agreements-panel" id="agreements">
@@ -133,15 +136,31 @@ export default function DashboardPage() {
             ) : (
               <div className="agreement-list">
                 <div className="agreement-list-head"><span>AGREEMENT</span><span>REFERENCE</span><span>STATUS</span><span>LAST UPDATED</span><span /></div>
-                {visibleAgreements.map((agreement) => (
-                  <Link className="agreement-row" href={`/agreements/${agreement.id}`} key={agreement.id}>
-                    <span className="agreement-title"><span className="agreement-file-icon">▤</span><span><strong>{agreement.title}</strong><small>{agreement.category}</small></span></span>
-                    <span className="reference-text">{agreement.publicReference}</span>
-                    <span><span className={`status-badge status-${agreement.status.toLowerCase()}`}><i />{agreement.status.toLowerCase().replaceAll("_", " ")}</span></span>
-                    <span className="date-text">{new Date(agreement.updatedAt).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })}</span>
-                    <span className="row-arrow">→</span>
-                  </Link>
-                ))}
+                {visibleAgreements.map((agreement) => {
+                  const href = `/agreements/${agreement.id}`;
+                  return (
+                    <div
+                      className="agreement-row"
+                      key={agreement.id}
+                      onClick={(event) => {
+                        if ((event.target as HTMLElement).closest("a, button")) return;
+                        router.push(href);
+                      }}
+                    >
+                      <Link className="agreement-title" href={href}>
+                        <span className="agreement-file-icon">▤</span>
+                        <span><strong>{agreement.title}</strong><small>{agreement.category}</small></span>
+                      </Link>
+                      <span className="reference-text">{agreement.publicReference}</span>
+                      <span><span className={`status-badge status-${agreement.status.toLowerCase()}`}><i />{agreement.status.toLowerCase().replaceAll("_", " ")}</span></span>
+                      <span className="date-text">{new Date(agreement.updatedAt).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })}</span>
+                      <span className="row-actions">
+                        {agreement.status === "DRAFT" && <Link className="row-quick-action" href={`/agreements/${agreement.id}/edit`}>Edit</Link>}
+                        <Link className="row-open-action" href={href} aria-label={`Open ${agreement.title}`}>Open <span aria-hidden="true">→</span></Link>
+                      </span>
+                    </div>
+                  );
+                })}
               </div>
             )}
           </section>

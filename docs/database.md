@@ -7,7 +7,8 @@ Prisma models currently cover:
 - `agreements`: unique public reference, issuer foreign key, draft metadata, status, currency, dates, and query indexes.
 - `agreement_versions`: immutable-at-the-workflow-level canonical JSON snapshot, canonicalization version, SHA-256 hash, and unique per-agreement version number.
 - `agreement_events`: minimized event payload and previous/current event hashes.
+- `agreement_signers`: issuer/counterparty signing state, hashed invitation/OTP/session secrets, consent name, signature time, and the locked content fingerprint each signer accepted.
 
-Draft creation inserts the agreement, version 1 and initial event in one Prisma transaction. No finalized content is updated or deleted by the current API. The schema deliberately excludes identity-number and phone-verification records until collection is justified and the required encryption, retention, and provider design are approved.
+Draft creation inserts the agreement, version 1 and initial event in one Prisma transaction. Requesting signatures locks the current version. A `FINALIZED` agreement requires both signer records to reference that exact version's fingerprint. The schema deliberately excludes identity-number and phone-verification records until collection is justified and the required encryption, retention, and provider design are approved.
 
 Run `npm run db:migrate` for local development and `npm run db:deploy` for deployment. The initial migration is committed under `prisma/migrations`; review any new migration before applying it. Back up the database, test restoration, and establish retention/legal-hold policy before real user data is accepted.

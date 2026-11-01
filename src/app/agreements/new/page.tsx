@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FormEvent, useEffect, useState } from "react";
+import { StepProgress } from "@/components/step-progress";
 
 export default function NewAgreementPage() {
   const router = useRouter();
@@ -32,7 +33,7 @@ export default function NewAgreementPage() {
         setError(result.error ?? "We couldn’t save this draft.");
         return;
       }
-      router.push(`/agreements/${result.agreement.id}`);
+      router.push(`/agreements/${result.agreement.id}/parties`);
     } catch {
       setError("Connection problem. Your draft was not saved. Please try again.");
     } finally {
@@ -51,8 +52,8 @@ export default function NewAgreementPage() {
       <section className="dashboard-main">
         <header className="dashboard-topbar"><div className="breadcrumbs"><Link href="/dashboard">Workspace</Link> <span>/</span> <strong>New agreement</strong></div><Link className="button button-quiet" href="/dashboard">Back to workspace</Link></header>
         <div className="form-page-content">
-          <div className="form-page-heading"><span className="eyebrow">NEW AGREEMENT · STEP 1 OF 1</span><h1>Start with the essentials.</h1><p>Create a private draft. Nothing is sent to anyone until you choose to invite them.</p></div>
-          <div className="step-progress"><span className="step-progress-active">01 <span>Details</span></span><i /><span>02 <span>Parties</span></span><i /><span>03 <span>Review</span></span></div>
+          <div className="form-page-heading"><span className="eyebrow">NEW AGREEMENT · STEP 1 OF 3</span><h1>Start with the essentials.</h1><p>Create a private draft. Nothing is sent to anyone until you choose to invite them.</p></div>
+          <StepProgress current={1} />
           <form id="agreement-form" className="agreement-form-card" onSubmit={submit}>
             <div className="form-section-title"><span className="section-number">1</span><div><h2>Agreement details</h2><p>Give this draft a clear title and a little context.</p></div></div>
             <label className="field"><span>Agreement title <b>*</b></span><input name="title" placeholder="e.g. Equipment rental agreement" minLength={3} maxLength={120} required /><small>Use a name both parties will recognize.</small></label>

@@ -1,8 +1,8 @@
 # AgreeIt
 
-AgreeIt is a Rwanda-first agreement workflow application. This repository contains the foundation and first working vertical slice: account registration/login, PostgreSQL-backed sessions, private draft creation, versioned draft content, and an authenticated agreement list/detail view.
+AgreeIt is a Rwanda-first agreement workflow application. The app supports account registration/login, private agreement drafts, versioned terms, invitation by email, email-code verification for the second party, and typed in-app signatures from both parties against one locked agreement version.
 
-> **MVP boundary:** This is not a production-ready signing service. Invitations, phone OTP, recipient participation, amendments, signatures, PDF generation, public verification, admin tools, and notification delivery are not implemented. Do not enter real national identity data or treat a draft as signed or legally approved.
+> **MVP boundary:** In-app typed signatures and email verification are not a qualified digital signature, independent identity proof, or guarantee of legal enforceability. Obtain qualified Rwanda legal/privacy review before production use. PDF generation, public verification, admin tools, amendments, and phone/identity verification are not implemented.
 
 ## Requirements
 
@@ -36,7 +36,7 @@ npm run db:migrate
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000). Create an account and save a private agreement draft from the dashboard.
+Open [http://localhost:3000](http://localhost:3000). Create an account, prepare an agreement with the other party's email, review it, and request signatures. Configure `RESEND_API_KEY` and `EMAIL_FROM` in `.env` to send invitations; the sender address must be verified with Resend.
 
 ## Validation
 
@@ -58,6 +58,8 @@ CI in [`.github/workflows/ci.yml`](./.github/workflows/ci.yml) applies the commi
    - `DIRECT_URL`: the direct/session connection string used by migrations.
    - `SESSION_SECRET`: a random value of at least 32 characters.
    - `APP_URL`: the deployed URL, for example `https://your-project.vercel.app`.
+   - `RESEND_API_KEY`: Resend API key for counterparty invitations and verification codes.
+   - `EMAIL_FROM`: verified sender email address, for example `agreements@example.com`.
 3. Apply the database migration once against the production database:
 
    ```powershell
@@ -83,7 +85,7 @@ URL-encode special characters in the password. Keep `sslmode=require` if your co
 
 ## Configuration
 
-See [.env.example](./.env.example). Production must use a managed secret store, HTTPS, a managed PostgreSQL deployment, reviewed data-location/subprocessor arrangements, backups, and a production-ready rate limiter. No SMS, email, identity, storage, or signing-provider credentials are needed or included in this MVP.
+See [.env.example](./.env.example). Production must use a managed secret store, HTTPS, a managed PostgreSQL deployment, reviewed data-location/subprocessor arrangements, backups, and a production-ready rate limiter. Email delivery is provided through Resend; do not commit provider credentials. No SMS, government identity, qualified digital-signature provider, or file-storage credentials are included.
 
 ## Architecture and readiness
 
