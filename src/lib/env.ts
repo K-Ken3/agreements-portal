@@ -4,9 +4,14 @@ const optionalNonEmptyString = z.preprocess(
   (value) => (value === "" ? undefined : value),
   z.string().min(1).optional()
 );
+const emailSender = z.string().trim().max(320).refine((value) => {
+  const displayNameMatch = value.match(/^(?:"[^"]+"|[^<>]+)\s*<([^<>]+)>$/);
+  const address = displayNameMatch?.[1] ?? value;
+  return z.email().safeParse(address).success;
+}, "Enter a sender email address, optionally with a display name.");
 const optionalEmail = z.preprocess(
   (value) => (value === "" ? undefined : value),
-  z.email().optional()
+  emailSender.optional()
 );
 
 const envSchema = z.object({

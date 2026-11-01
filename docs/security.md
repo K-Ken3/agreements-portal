@@ -11,7 +11,6 @@
 - Default response headers include frame, MIME-sniffing, referrer, and browser permission protections.
 - Agreement content and event history use SHA-256 hashes; current-version creation is transactional.
 - Signing invitations use random one-time bearer tokens stored as HMAC hashes. Counterparty verification codes are short-lived, HMAC-protected, limited to five attempts, and sent through Resend; verified signing sessions use hashed opaque tokens in HttpOnly cookies.
-- Manual bearer-link invitations are opt-in, expire within seven days (or at the agreement deadline), and are disclosed as not verifying email ownership. The raw link is returned only to the authenticated issuer at creation; only its HMAC hash is persisted.
 - Both signature records bind a typed name, timestamp, and the immutable content fingerprint. The agreement is finalized only after both parties sign.
 
 ## Not yet implemented / required before production

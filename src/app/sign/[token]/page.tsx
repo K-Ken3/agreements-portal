@@ -31,7 +31,6 @@ type SigningSession = {
     name: string;
     email: string;
     signedAt: string | null;
-    emailVerificationRequired: boolean;
   };
   agreement: SigningAgreement;
 };
@@ -50,7 +49,6 @@ export default function SignAgreementPage() {
   const params = useParams<{ token: string }>();
   const invitationToken = params.token;
   const [session, setSession] = useState<SigningSession | null>(null);
-  const [emailVerificationRequired, setEmailVerificationRequired] = useState<boolean | null>(null);
   const [code, setCode] = useState("");
   const [signedName, setSignedName] = useState("");
   const [consent, setConsent] = useState(false);
@@ -70,7 +68,6 @@ export default function SignAgreementPage() {
           const result = (await sessionResponse.json()) as SigningSession;
           if (active) {
             setSession(result);
-            setEmailVerificationRequired(result.signer.emailVerificationRequired);
             setSignedName(result.signer.name);
           }
           return;
@@ -80,31 +77,7 @@ export default function SignAgreementPage() {
           throw new Error(result.error ?? "This signing invitation is unavailable.");
         }
 
-        const invitationResponse = await fetch(
-          `/api/v1/signatures/verify?token=${encodeURIComponent(invitationToken)}`
-        );
-        const invitation = (await invitationResponse.json()) as {
-          emailVerificationRequired?: boolean;
-          error?: string;
-        };
-        if (!invitationResponse.ok || typeof invitation.emailVerificationRequired !== "boolean") {
-          throw new Error(invitation.error ?? "This signing invitation is unavailable.");
-        }
-        if (active) setEmailVerificationRequired(invitation.emailVerificationRequired);
-
-        if (!invitation.emailVerificationRequired) {
-          const verifyResponse = await fetch("/api/v1/signatures/verify", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ token: invitationToken })
-          });
-          const result = (await verifyResponse.json()) as SigningSession & { error?: string };
-          if (!verifyResponse.ok) throw new Error(result.error ?? "This invitation link could not be verified.");
-          if (active) {
-            setSession(result);
-            setSignedName(result.signer.name);
-          }
-        }
+        if (sessionResponse.status === 401) return;
       } catch (loadError) {
         if (active) {
           setError(loadError instanceof Error ? loadError.message : "This signing invitation could not be loaded.");
@@ -207,13 +180,7 @@ export default function SignAgreementPage() {
             {agreement && <p className="signing-reference">{agreement.publicReference} · {agreement.title}</p>}
             <p className="legal-note">This in-app signature is not a qualified digital signature or a guarantee of legal enforceability.</p>
           </div>
-        ) : !session && emailVerificationRequired === null ? (
-          <div className="signing-card">
-            <span className="eyebrow">CHECKING INVITATION</span>
-            <h1>Opening secure signing link.</h1>
-            {error && <p className="form-error" role="alert">{error}</p>}
-          </div>
-        ) : !session && emailVerificationRequired ? (
+        ) : !session ? (
           <div className="signing-card">
             <span className="eyebrow">VERIFY YOUR EMAIL</span>
             <h1>Review and sign an agreement.</h1>
@@ -225,13 +192,6 @@ export default function SignAgreementPage() {
               <button className="button button-primary" type="submit" disabled={pending}>{pending ? "Verifying…" : "Verify and continue"}</button>
               <button className="button button-quiet" type="button" onClick={resendCode} disabled={pending}>Send another code</button>
             </form>
-          </div>
-        ) : !session ? (
-          <div className="signing-card">
-            <span className="eyebrow">SECURE MANUAL INVITATION</span>
-            <h1>Opening signing agreement.</h1>
-            {error && <p className="form-error" role="alert">{error}</p>}
-            <p className="legal-note">This link does not verify control of the recipient’s email address.</p>
           </div>
         ) : (
           <div className="signing-card">
@@ -250,7 +210,7 @@ export default function SignAgreementPage() {
               <div className="terms-text">{agreement?.canonicalContent.clauses ?? "No terms have been added."}</div>
               <div className="hash-row"><span>Locked content fingerprint</span><code>{agreement?.contentHash}</code></div>
             </section>
-            <p className="legal-note">{session.signer.emailVerificationRequired ? "Email verification confirms access to this email account; it does not independently verify identity." : "This manually shared link does not verify control of the listed email account. Anyone holding the link can access this signing page."} The agreement is not final until both parties sign.</p>
+            <p className="legal-note">Email verification confirms access to this email account; it does not independently verify identity. The agreement is not final until both parties sign.</p>
             <form className="signing-form" onSubmit={sign}>
               <label className="field"><span>Type your name as shown on the agreement</span><input value={signedName} onChange={(event) => setSignedName(event.target.value)} minLength={2} maxLength={120} required /></label>
               <label className="confirm-row"><input type="checkbox" checked={consent} onChange={(event) => setConsent(event.target.checked)} /><span>I have reviewed this exact version and intend to sign it using this typed name as my electronic signature.</span></label>

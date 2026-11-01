@@ -6,11 +6,10 @@
 2. Sign in with email and password; logout revokes the active session.
 3. Open the authenticated dashboard and see private issuer drafts.
 4. Create a draft with title, category, description, agreement terms, RWF currency, effective date, signing deadline, and the other party's name/email.
-5. Review and lock the complete draft version, then either email the other party a private signing link and one-time code or create a secure manual bearer link.
-6. Email invitees verify the email code; manual-link invitees use the link as their access credential. The issuer is warned that manual links do not verify email ownership.
-7. The recipient reads the locked terms, types their listed name, and explicitly consents to sign.
-8. The issuer signs while authenticated. Either party may sign first; only the second signature finalises the agreement.
-9. The server records each signature against the locked version's content hash, timestamps it, and adds a chained audit event. The issuer can view the signing record.
+5. Review and lock the complete draft version, then email the other party a private signing link and one-time code.
+6. The recipient verifies the email code, reads the locked terms, types their listed name, and explicitly consents to sign.
+7. The issuer signs while authenticated. Either party may sign first; only the second signature finalises the agreement.
+8. The server records each signature against the locked version's content hash, timestamps it, and adds a chained audit event. The issuer can view the signing record.
 
 ## Remaining phases
 

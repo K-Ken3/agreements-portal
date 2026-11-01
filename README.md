@@ -1,6 +1,6 @@
 # AgreeIt
 
-AgreeIt is a Rwanda-first agreement workflow application. The app supports account registration/login, private agreement drafts, versioned terms, email invitations with email-code verification or issuer-created manual bearer links, and typed in-app signatures from both parties against one locked agreement version.
+AgreeIt is a Rwanda-first agreement workflow application. The app supports account registration/login, private agreement drafts, versioned terms, email invitations with email-code verification, and typed in-app signatures from both parties against one locked agreement version.
 
 > **MVP boundary:** In-app typed signatures and email verification are not a qualified digital signature, independent identity proof, or guarantee of legal enforceability. Obtain qualified Rwanda legal/privacy review before production use. PDF generation, public verification, admin tools, amendments, and phone/identity verification are not implemented.
 
@@ -36,7 +36,7 @@ npm run db:migrate
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000). Create an account, prepare an agreement with the other party's email, and review it. You can use a manual invitation link without email delivery; anyone holding that link can access the agreement, and it does not verify email ownership. Configure `RESEND_API_KEY` and a sender address on a Resend-verified domain in `EMAIL_FROM` to send email invitations.
+Open [http://localhost:3000](http://localhost:3000). Create an account, prepare an agreement with the other party's email, and review it. Configure `RESEND_API_KEY` and a sender address on a Resend-verified domain in `EMAIL_FROM` to send email invitations.
 
 ## Validation
 
@@ -68,7 +68,7 @@ CI in [`.github/workflows/ci.yml`](./.github/workflows/ci.yml) applies the commi
    npx prisma migrate deploy
    ```
 
-   This applies the agreement-signing and manual-invitation schema changes.
+   This applies the agreement-signing schema changes and removes the retired manual-link field.
 
 4. Deploy. `npm run postinstall` generates the Prisma client during the Vercel build.
 

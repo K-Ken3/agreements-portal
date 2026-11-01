@@ -126,27 +126,26 @@ model AgreementEvent {
 }
 
 model AgreementSigner {
-  id                        String              @id @default(uuid()) @db.Uuid
-  agreementId               String              @map("agreement_id") @db.Uuid
-  role                      AgreementSignerRole
-  name                      String
-  email                     String
-  emailVerificationRequired Boolean             @default(true) @map("email_verification_required")
-  invitationTokenHash       String?             @unique @map("invitation_token_hash")
-  invitationExpiresAt       DateTime?           @map("invitation_expires_at")
-  invitationSentAt          DateTime?           @map("invitation_sent_at")
-  otpHash                   String?             @map("otp_hash")
-  otpExpiresAt              DateTime?           @map("otp_expires_at")
-  otpAttempts               Int                 @default(0) @map("otp_attempts")
-  otpSentAt                 DateTime?           @map("otp_sent_at")
-  otpSendCount              Int                 @default(0) @map("otp_send_count")
-  verifiedAt                DateTime?           @map("verified_at")
-  sessionTokenHash          String?             @unique @map("session_token_hash")
-  sessionExpiresAt          DateTime?           @map("session_expires_at")
-  signedName                String?             @map("signed_name")
-  signedAt                  DateTime?           @map("signed_at")
-  signedContentHash         String?             @map("signed_content_hash")
-  agreement                 Agreement           @relation(fields: [agreementId], references: [id], onDelete: Restrict)
+  id                  String              @id @default(uuid()) @db.Uuid
+  agreementId         String              @map("agreement_id") @db.Uuid
+  role                AgreementSignerRole
+  name                String
+  email               String
+  invitationTokenHash String?             @unique @map("invitation_token_hash")
+  invitationExpiresAt DateTime?           @map("invitation_expires_at")
+  invitationSentAt    DateTime?           @map("invitation_sent_at")
+  otpHash             String?             @map("otp_hash")
+  otpExpiresAt        DateTime?           @map("otp_expires_at")
+  otpAttempts         Int                 @default(0) @map("otp_attempts")
+  otpSentAt           DateTime?           @map("otp_sent_at")
+  otpSendCount        Int                 @default(0) @map("otp_send_count")
+  verifiedAt          DateTime?           @map("verified_at")
+  sessionTokenHash    String?             @unique @map("session_token_hash")
+  sessionExpiresAt    DateTime?           @map("session_expires_at")
+  signedName          String?             @map("signed_name")
+  signedAt            DateTime?           @map("signed_at")
+  signedContentHash   String?             @map("signed_content_hash")
+  agreement           Agreement           @relation(fields: [agreementId], references: [id], onDelete: Restrict)
 
   @@unique([agreementId, role])
   @@index([agreementId, signedAt])

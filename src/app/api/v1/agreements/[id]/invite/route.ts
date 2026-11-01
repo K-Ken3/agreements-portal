@@ -1,10 +1,8 @@
 import { randomUUID } from "node:crypto";
 import { AgreementSignerRole, AgreementStatus } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
-import { z } from "zod";
 import { getAuthenticatedUser, rejectCrossOriginMutation } from "@/lib/auth";
 import { hashAgreementEvent, hashCanonicalContent, readAgreementParties } from "@/lib/agreements";
-import { env } from "@/lib/env";
 import { prisma } from "@/lib/prisma";
 import {
   createSigningCode,
@@ -17,10 +15,6 @@ import {
 
 class SigningConflictError extends Error {}
 
-const invitationSchema = z.object({
-  method: z.enum(["email", "manual"]).default("email")
-});
-
 export async function POST(
   request: NextRequest,
   context: { params: Promise<{ id: string }> }
@@ -29,19 +23,7 @@ export async function POST(
   if (originError) return originError;
   const user = await getAuthenticatedUser(request);
   if (!user) return NextResponse.json({ error: "Authentication required." }, { status: 401 });
-
-  let input: unknown;
-  try {
-    input = await request.json();
-  } catch {
-    return NextResponse.json({ error: "Invalid request body." }, { status: 400 });
-  }
-  const parsed = invitationSchema.safeParse(input);
-  if (!parsed.success) {
-    return NextResponse.json({ error: "Choose email delivery or a manual invitation link." }, { status: 400 });
-  }
-  const invitationMethod = parsed.data.method;
-  if (invitationMethod === "email" && !isEmailDeliveryConfigured()) {
+  if (!isEmailDeliveryConfigured()) {
     return NextResponse.json(
       { error: "Email delivery is not configured. Contact the administrator before requesting signatures." },
       { status: 503 }
@@ -90,7 +72,7 @@ export async function POST(
   }
 
   const invitationToken = createSigningToken();
-  const verificationCode = invitationMethod === "email" ? createSigningCode() : null;
+  const verificationCode = createSigningCode();
   const invitationExpiresAt = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
   if (deadline && deadline < invitationExpiresAt) invitationExpiresAt.setTime(deadline.getTime());
   const otpExpiresAt = new Date(now.getTime() + 10 * 60 * 1000);
@@ -123,13 +105,10 @@ export async function POST(
         select: { eventHash: true }
       });
       const occurredAt = new Date();
-      const eventType = invitationMethod === "email"
-        ? "agreement.signing_invited"
-        : "agreement.manual_signing_link_created";
       const eventHash = hashAgreementEvent({
         agreementId: id,
         actorUserId: user.id,
-        eventType,
+        eventType: "agreement.signing_invited",
         occurredAt: occurredAt.toISOString(),
         payload
       }, previousEvent?.eventHash ?? null);
@@ -157,14 +136,13 @@ export async function POST(
             role: AgreementSignerRole.COUNTERPARTY,
             name: parties.counterpartyName,
             email: parties.counterpartyEmail,
-            emailVerificationRequired: invitationMethod === "email",
             invitationTokenHash: hashSigningSecret("invitation", invitationToken),
             invitationExpiresAt,
             invitationSentAt: occurredAt,
-            otpHash: verificationCode ? hashSigningSecret("otp", verificationCode) : null,
-            otpExpiresAt: verificationCode ? otpExpiresAt : null,
-            otpSentAt: verificationCode ? occurredAt : null,
-            otpSendCount: verificationCode ? 1 : 0
+            otpHash: hashSigningSecret("otp", verificationCode),
+            otpExpiresAt,
+            otpSentAt: occurredAt,
+            otpSendCount: 1
           }
         ]
       });
@@ -173,7 +151,7 @@ export async function POST(
           id: eventId,
           agreementId: id,
           actorUserId: user.id,
-          eventType,
+          eventType: "agreement.signing_invited",
           payload,
           occurredAt,
           previousEventHash: previousEvent?.eventHash ?? null,
@@ -187,24 +165,6 @@ export async function POST(
     }
     console.error("Agreement signing invitation could not be recorded.");
     return NextResponse.json({ error: "Unable to start signing right now." }, { status: 500 });
-  }
-
-  const invitationUrl = new URL(`/sign/${encodeURIComponent(invitationToken)}`, env.APP_URL).toString();
-  if (invitationMethod === "manual") {
-    return NextResponse.json({
-      agreement: { id, status: AgreementStatus.LOCKED_FOR_SIGNING },
-      invitation: {
-        method: "manual",
-        url: invitationUrl,
-        expiresAt: invitationExpiresAt
-      },
-      message: "The agreement is locked. Share this secure link with the other party. Email ownership is not verified."
-    }, { status: 201 });
-  }
-
-  if (!verificationCode) {
-    console.error("Email invitation did not have a verification code.");
-    return NextResponse.json({ error: "Unable to prepare the email verification code." }, { status: 500 });
   }
 
   try {

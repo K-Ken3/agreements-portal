@@ -43,7 +43,7 @@ export async function GET(request: NextRequest) {
     signer.role !== AgreementSignerRole.COUNTERPARTY ||
     !signer.sessionExpiresAt ||
     signer.sessionExpiresAt <= new Date() ||
-    (signer.emailVerificationRequired && !signer.verifiedAt) ||
+    !signer.verifiedAt ||
     !signer.invitationExpiresAt ||
     signer.invitationExpiresAt <= new Date()
   ) {
@@ -58,8 +58,7 @@ export async function GET(request: NextRequest) {
       id: signer.id,
       name: signer.name,
       email: signer.email,
-      signedAt: signer.signedAt,
-      emailVerificationRequired: signer.emailVerificationRequired
+      signedAt: signer.signedAt
     },
     agreement: {
       id: signer.agreement.id,
@@ -112,7 +111,7 @@ export async function POST(request: NextRequest) {
       if (
         !signer ||
         signer.role !== AgreementSignerRole.COUNTERPARTY ||
-          (signer.emailVerificationRequired && !signer.verifiedAt) ||
+          !signer.verifiedAt ||
         !signer.sessionExpiresAt ||
           signer.sessionExpiresAt <= new Date() ||
           !signer.invitationExpiresAt ||
