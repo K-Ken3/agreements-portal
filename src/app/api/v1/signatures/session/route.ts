@@ -43,7 +43,9 @@ export async function GET(request: NextRequest) {
     signer.role !== AgreementSignerRole.COUNTERPARTY ||
     !signer.sessionExpiresAt ||
     signer.sessionExpiresAt <= new Date() ||
-    !signer.verifiedAt
+    (signer.emailVerificationRequired && !signer.verifiedAt) ||
+    !signer.invitationExpiresAt ||
+    signer.invitationExpiresAt <= new Date()
   ) {
     return NextResponse.json({ error: "Your signing session has expired. Verify your email again." }, { status: 401 });
   }
@@ -56,7 +58,8 @@ export async function GET(request: NextRequest) {
       id: signer.id,
       name: signer.name,
       email: signer.email,
-      signedAt: signer.signedAt
+      signedAt: signer.signedAt,
+      emailVerificationRequired: signer.emailVerificationRequired
     },
     agreement: {
       id: signer.agreement.id,
@@ -109,9 +112,11 @@ export async function POST(request: NextRequest) {
       if (
         !signer ||
         signer.role !== AgreementSignerRole.COUNTERPARTY ||
-        !signer.verifiedAt ||
+          (signer.emailVerificationRequired && !signer.verifiedAt) ||
         !signer.sessionExpiresAt ||
-        signer.sessionExpiresAt <= new Date()
+          signer.sessionExpiresAt <= new Date() ||
+          !signer.invitationExpiresAt ||
+          signer.invitationExpiresAt <= new Date()
       ) {
         throw new Error("SIGNING_SESSION_EXPIRED");
       }

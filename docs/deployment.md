@@ -20,7 +20,7 @@ No hosting platform, region, provider credentials, or deployment automation is s
 
 Vercel can build the Next.js application directly from the repository. Set `DATABASE_URL` (pooled serverless connection), `DIRECT_URL` (migration connection), `SESSION_SECRET`, and `APP_URL` in the project environment settings. The `postinstall` script generates the Prisma client.
 
-Apply migrations separately before the first deployment and after each reviewed migration:
+Apply migrations separately before the first deployment and after each reviewed migration. The current signing workflow requires the committed `agreement_signers` migrations, including the manual-link email-verification flag:
 
 ```powershell
 $env:DATABASE_URL="<production pooled connection string>"

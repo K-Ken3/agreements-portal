@@ -445,9 +445,18 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 .signature-record small { color: #83928e; font-size: 9px; font-weight: 700; letter-spacing: 1px; }
 .signature-record strong { color: #30454c; font-size: 13px; }
 .signature-record code { font-size: 9px; }
+.manual-invitation { display: grid; gap: 14px; margin-top: 20px; padding: 20px; border: 1px solid #e4ebe8; border-radius: 8px; background: #fbfdfc; }
+.manual-invitation h2 { margin: 0; color: var(--navy); font-family: var(--font-display); font-size: 16px; }
+.manual-invitation > p { margin: 0; color: #64737a; font-size: 11px; line-height: 1.7; }
+.manual-invitation > .button { justify-self: start; }
+.manual-link-result { display: grid; gap: 10px; padding-top: 8px; }
+.manual-link-result .field input { font-size: 11px; }
+.manual-link-result .button { justify-self: start; }
 @media (max-width: 700px) {
   .signing-header { padding: 0 18px; }
   .signing-header .eyebrow { font-size: 8px; }
   .signing-content { margin: 22px auto; }
   .signature-list { grid-template-columns: 1fr; }
+  .manual-invitation > .button,
+  .manual-link-result .button { width: 100%; }
 }

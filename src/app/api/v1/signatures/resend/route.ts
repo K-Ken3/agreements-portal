@@ -44,6 +44,12 @@ export async function POST(request: NextRequest) {
   ) {
     return NextResponse.json({ error: "This signing invitation has expired or is no longer active." }, { status: 410 });
   }
+  if (!signer.emailVerificationRequired) {
+    return NextResponse.json(
+      { error: "This invitation uses a secure manual link and has no email verification code." },
+      { status: 409 }
+    );
+  }
   if (signer.otpSendCount >= 5) {
     return NextResponse.json({ error: "The maximum number of verification codes has been sent." }, { status: 429 });
   }

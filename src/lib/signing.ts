@@ -1,4 +1,4 @@
-import { createHmac, randomBytes, randomInt, timingSafeEqual } from "node:crypto";
+import { createHmac, randomBytes, randomInt, randomUUID, timingSafeEqual } from "node:crypto";
 import { env } from "@/lib/env";
 
 export function createSigningToken(): string {
@@ -60,6 +60,9 @@ export async function sendSigningInvitation(input: {
     "If you were not expecting this invitation, you can ignore this email."
   ].join("\n");
 
+  const requestId = randomUUID();
+  console.info("Submitting agreement signing invitation to Resend.", { requestId });
+
   let response: Response;
   try {
     response = await fetch("https://api.resend.com/emails", {
@@ -76,10 +79,48 @@ export async function sendSigningInvitation(input: {
       }),
       signal: AbortSignal.timeout(10_000)
     });
-  } catch {
-    throw new EmailDeliveryError("The invitation email could not be delivered.");
+  } catch (error) {
+    console.error("Resend request failed before a response was received.", {
+      requestId,
+      errorType: error instanceof Error ? error.name : "UnknownError"
+    });
+    throw new EmailDeliveryError(
+      "Our server could not connect to Resend. Check the Vercel function logs and try again."
+    );
   }
   if (!response.ok) {
-    throw new EmailDeliveryError("The invitation email could not be delivered.");
+    let providerError = "unknown";
+    try {
+      const body: unknown = await response.clone().json();
+      if (
+        body &&
+        typeof body === "object" &&
+        "name" in body &&
+        typeof body.name === "string" &&
+        /^[a-z0-9_-]{1,60}$/i.test(body.name)
+      ) {
+        providerError = body.name;
+      }
+    } catch {
+      // The response body is intentionally not logged; status and safe error code are sufficient.
+    }
+
+    console.error("Resend rejected the signing invitation.", {
+      requestId,
+      status: response.status,
+      providerError
+    });
+    const message = response.status === 401
+      ? "Resend rejected the API key. Check that the correct RESEND_API_KEY is set for this Vercel environment."
+      : response.status === 403
+        ? "Resend denied the request. Check the API key permissions and sender-domain verification."
+        : response.status === 422
+          ? "Resend rejected the sender or recipient. Check the sender address, verified domain, and recipient restrictions."
+          : response.status === 429
+            ? "Resend rate-limited this request. Wait a little and try again."
+            : response.status >= 500
+              ? "Resend is temporarily unavailable. Try again later."
+              : "Resend rejected the invitation. Check the Vercel function logs for the provider status.";
+    throw new EmailDeliveryError(message);
   }
 }

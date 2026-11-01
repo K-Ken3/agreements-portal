@@ -21,9 +21,12 @@ export default function AgreementReviewPage() {
   const router = useRouter();
   const [agreement, setAgreement] = useState<AgreementDetail | null>(null);
   const [confirmed, setConfirmed] = useState(false);
+  const [manualLinkConfirmed, setManualLinkConfirmed] = useState(false);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState("");
   const [loadError, setLoadError] = useState("");
+  const [invitationUrl, setInvitationUrl] = useState("");
+  const [linkCopied, setLinkCopied] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -47,17 +50,27 @@ export default function AgreementReviewPage() {
     };
   }, [params.id, router]);
 
-  async function requestSignatures() {
+  async function requestSignatures(method: "email" | "manual") {
     setPending(true);
     setError("");
+    setInvitationUrl("");
+    setLinkCopied(false);
     try {
       const response = await fetch(`/api/v1/agreements/${encodeURIComponent(params.id)}/invite`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" }
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ method })
       });
-      const result = (await response.json()) as { error?: string };
+      const result = (await response.json()) as {
+        error?: string;
+        invitation?: { method: "manual"; url: string };
+      };
       if (!response.ok) {
         setError(result.error ?? "We couldn’t send the signing invitation.");
+        return;
+      }
+      if (method === "manual" && result.invitation?.url) {
+        setInvitationUrl(result.invitation.url);
         return;
       }
       router.push(`/agreements/${params.id}`);
@@ -69,9 +82,20 @@ export default function AgreementReviewPage() {
     }
   }
 
+  async function copyInvitationLink() {
+    try {
+      await navigator.clipboard.writeText(invitationUrl);
+      setLinkCopied(true);
+      setError("");
+    } catch {
+      setLinkCopied(false);
+      setError("Automatic copying is unavailable. Select the invitation link above and copy it manually.");
+    }
+  }
+
   const parties = agreement?.parties;
   const canFinalize =
-    agreement?.status === "DRAFT" && Boolean(parties) && confirmed && !pending;
+    agreement?.status === "DRAFT" && Boolean(parties) && confirmed && !pending && !invitationUrl;
 
   return (
     <main className="app-shell">
@@ -99,8 +123,8 @@ export default function AgreementReviewPage() {
 
               {agreement.status !== "DRAFT" ? (
                 <div className="inline-notice" role="status">
-                  This agreement is {agreement.status.toLowerCase().replaceAll("_", " ")} and cannot be finalised again.
-                  <Link className="timeline-link" href={`/agreements/${agreement.id}`}>View the final record →</Link>
+                  This agreement is {agreement.status.toLowerCase().replaceAll("_", " ")}; its terms are locked and cannot be changed.
+                  <Link className="timeline-link" href={`/agreements/${agreement.id}`}>View the signing record →</Link>
                 </div>
               ) : !parties ? (
                 <div className="inline-notice" role="status">
@@ -145,12 +169,35 @@ export default function AgreementReviewPage() {
                     <Link className="button button-quiet" href={`/agreements/${agreement.id}/edit`}>← Edit details</Link>
                     <div className="review-actions-right">
                       <Link className="button button-outline" href={`/agreements/${agreement.id}/parties`}>Edit party</Link>
-                      <button className="button button-primary" type="button" onClick={requestSignatures} disabled={!canFinalize}>{pending ? "Sending invitation…" : "Request signatures"} <span aria-hidden="true">→</span></button>
+                      <button className="button button-primary" type="button" onClick={() => requestSignatures("email")} disabled={!canFinalize}>{pending ? "Sending invitation…" : "Email signing invitation"} <span aria-hidden="true">→</span></button>
                     </div>
                   </div>
+                  <section className="manual-invitation">
+                    <h2>Share a signing link manually</h2>
+                    <p>Create a secure link to share with the other party through your own trusted channel. Anyone with the link can access the agreement; this option does not verify their email address.</p>
+                    <label className="confirm-row">
+                      <input type="checkbox" checked={manualLinkConfirmed} onChange={(event) => setManualLinkConfirmed(event.target.checked)} />
+                      <span>I understand that a manual link is a bearer credential and does not verify the recipient’s email ownership.</span>
+                    </label>
+                    <button className="button button-outline" type="button" onClick={() => requestSignatures("manual")} disabled={!canFinalize || !manualLinkConfirmed}>
+                      {pending ? "Creating secure link…" : "Create manual invitation link"}
+                    </button>
+                    {invitationUrl && (
+                      <div className="manual-link-result" role="status">
+                        <label className="field">
+                          <span>Copy this secure link now. It is shown only once.</span>
+                          <input value={invitationUrl} readOnly onFocus={(event) => event.currentTarget.select()} />
+                        </label>
+                        <button className="button button-primary" type="button" onClick={copyInvitationLink}>
+                          {linkCopied ? "Link copied" : "Copy invitation link"}
+                        </button>
+                        <p className="legal-note">The agreement is locked for signing. The link expires within seven days or at the signing deadline, whichever comes first. Share it only with the intended party.</p>
+                      </div>
+                    )}
+                  </section>
                 </>
               )}
-              <p className="legal-note">The other party receives an email verification code and a private signing link. In-app signatures are not a qualified digital signature or a guarantee of legal enforceability.</p>
+              <p className="legal-note">Email invitations require a verified sender domain. Manual links do not verify email ownership. In-app signatures are not a qualified digital signature or a guarantee of legal enforceability.</p>
             </>
           )}
         </div>
