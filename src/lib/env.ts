@@ -13,14 +13,20 @@ const optionalEmail = z.preprocess(
   (value) => (value === "" ? undefined : value),
   emailSender.optional()
 );
+const optionalAppUrl = z.preprocess(
+  (value) => {
+    if (typeof value !== "string") return value;
+    const trimmed = value.trim();
+    if (!trimmed) return undefined;
+    return trimmed.includes("://") ? trimmed : `https://${trimmed}`;
+  },
+  z.string().url().optional()
+);
 
 const envSchema = z.object({
   DATABASE_URL: z.string().url().or(z.string().min(1)),
   SESSION_SECRET: z.string().min(32),
-  APP_URL: z.preprocess(
-    (value) => (value === "" ? undefined : value),
-    z.string().url().optional()
-  ),
+  APP_URL: optionalAppUrl,
   RESEND_API_KEY: optionalNonEmptyString,
   EMAIL_FROM: optionalEmail
 });
