@@ -87,7 +87,7 @@ export async function sendSigningInvitation(input: {
     "",
     `${input.issuerName} invited you to review and sign "${input.agreementTitle}" (${input.publicReference}).`,
     "",
-    `Open the secure signing page: ${invitationUrl}`,
+    `Review and sign the agreement: ${invitationUrl}`,
     `Your one-time verification code is: ${input.verificationCode}`,
     "",
     "The code expires in 10 minutes. The invitation expires in 7 days or on the agreement's signing deadline, whichever comes first.",
@@ -100,7 +100,13 @@ export async function sendSigningInvitation(input: {
       <p>${escapeHtml(input.issuerName)} invited you to review and sign
         <strong>${escapeHtml(input.agreementTitle)}</strong>
         (${escapeHtml(input.publicReference)}).</p>
-      <p><a href="${escapeHtml(invitationUrl)}" style="display:inline-block;padding:12px 18px;border-radius:6px;background:#087f43;color:#fff;text-decoration:none;font-weight:bold">Review agreement</a></p>
+      <table role="presentation" border="0" cellpadding="0" cellspacing="0" style="margin:24px 0">
+        <tr>
+          <td align="center" bgcolor="#087f43" style="border-radius:6px">
+            <a href="${escapeHtml(invitationUrl)}" style="display:inline-block;padding:14px 22px;border:1px solid #087f43;border-radius:6px;background-color:#087f43;color:#ffffff;font-family:Arial,sans-serif;font-size:16px;font-weight:bold;line-height:20px;text-align:center;text-decoration:none">Review and sign the agreement</a>
+          </td>
+        </tr>
+      </table>
       <p>Your one-time verification code is:</p>
       <p style="font-size:24px;font-weight:bold;letter-spacing:5px">${escapeHtml(input.verificationCode)}</p>
       <p style="color:#68777b;font-size:13px;line-height:1.6">The code expires in 10 minutes. The invitation expires in 7 days or on the agreement's signing deadline, whichever comes first.</p>
