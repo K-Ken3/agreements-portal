@@ -9,6 +9,30 @@ export function createSigningCode(): string {
   return randomInt(100_000, 1_000_000).toString();
 }
 
+export function getPublicAppUrl(): URL {
+  const configuredUrl =
+    env.APP_URL ??
+    process.env.VERCEL_PROJECT_PRODUCTION_URL ??
+    process.env.VERCEL_URL;
+  const appUrl = configuredUrl
+    ? new URL(
+        configuredUrl.includes("://") ? configuredUrl : `https://${configuredUrl}`
+      )
+    : new URL("http://localhost:3000");
+
+  if (
+    process.env.NODE_ENV === "production" &&
+    (appUrl.protocol !== "https:" ||
+      appUrl.hostname === "localhost" ||
+      appUrl.hostname === "127.0.0.1")
+  ) {
+    throw new EmailDeliveryError(
+      "Set APP_URL to the public HTTPS URL of the deployed AgreeIt app in Vercel."
+    );
+  }
+  return appUrl;
+}
+
 export function hashSigningSecret(purpose: string, value: string): string {
   return createHmac("sha256", env.SESSION_SECRET)
     .update(`${purpose}:${value}`)
@@ -44,10 +68,20 @@ export async function sendSigningInvitation(input: {
     throw new EmailDeliveryError("Email delivery is not configured.");
   }
 
+  const appUrl = getPublicAppUrl();
   const invitationUrl = new URL(
     `/sign/${encodeURIComponent(input.invitationToken)}`,
-    env.APP_URL
+    appUrl
   ).toString();
+  const logoUrl = new URL("/agreeit-logo.png", appUrl).toString();
+  const escapeHtml = (value: string) =>
+    value.replace(/[&<>"']/g, (character) => ({
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      "\"": "&quot;",
+      "'": "&#39;"
+    })[character] ?? character);
   const text = [
     `Hello ${input.signerName},`,
     "",
@@ -59,6 +93,19 @@ export async function sendSigningInvitation(input: {
     "The code expires in 10 minutes. The invitation expires in 7 days or on the agreement's signing deadline, whichever comes first.",
     "If you were not expecting this invitation, you can ignore this email."
   ].join("\n");
+  const html = `
+    <div style="max-width:560px;margin:0 auto;padding:32px 24px;color:#1d2b37;font-family:Arial,sans-serif">
+      <img src="${logoUrl}" alt="AgreeIt" width="180" style="display:block;width:180px;height:auto;margin:0 0 28px" />
+      <p>Hello ${escapeHtml(input.signerName)},</p>
+      <p>${escapeHtml(input.issuerName)} invited you to review and sign
+        <strong>${escapeHtml(input.agreementTitle)}</strong>
+        (${escapeHtml(input.publicReference)}).</p>
+      <p><a href="${escapeHtml(invitationUrl)}" style="display:inline-block;padding:12px 18px;border-radius:6px;background:#087f43;color:#fff;text-decoration:none;font-weight:bold">Review agreement</a></p>
+      <p>Your one-time verification code is:</p>
+      <p style="font-size:24px;font-weight:bold;letter-spacing:5px">${escapeHtml(input.verificationCode)}</p>
+      <p style="color:#68777b;font-size:13px;line-height:1.6">The code expires in 10 minutes. The invitation expires in 7 days or on the agreement's signing deadline, whichever comes first.</p>
+      <p style="color:#68777b;font-size:13px">If you were not expecting this invitation, you can ignore this email.</p>
+    </div>`;
 
   const requestId = randomUUID();
   console.info("Submitting agreement signing invitation to Resend.", { requestId });
@@ -75,7 +122,8 @@ export async function sendSigningInvitation(input: {
         from: env.EMAIL_FROM,
         to: [input.email],
         subject: `Review and sign: ${input.agreementTitle}`,
-        text
+        text,
+        html
       }),
       signal: AbortSignal.timeout(10_000)
     });

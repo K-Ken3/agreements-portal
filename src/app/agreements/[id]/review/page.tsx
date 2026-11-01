@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { StepProgress } from "@/components/step-progress";
+import { BrandLogo } from "@/components/brand-logo";
 import type { AgreementDetail } from "@/lib/agreement-types";
 
 function formatDate(value: string | null | undefined): string {
@@ -75,7 +76,7 @@ export default function AgreementReviewPage() {
   return (
     <main className="app-shell">
       <aside className="sidebar">
-        <Link className="brand sidebar-brand" href="/dashboard"><span>AgreeIt</span></Link>
+        <Link className="brand sidebar-brand" href="/dashboard"><BrandLogo /></Link>
         <span className="sidebar-label">WORKSPACE</span>
         <nav className="sidebar-nav" aria-label="Workspace"><Link className="sidebar-link" href="/dashboard"><span>▦</span> Overview</Link><Link className="sidebar-link active" href="/dashboard#agreements"><span>▤</span> Agreements</Link></nav>
         <div className="sidebar-bottom"><div className="sidebar-help"><span>i</span><div><strong>Final review</strong><small>Check before you lock the record</small></div></div></div>

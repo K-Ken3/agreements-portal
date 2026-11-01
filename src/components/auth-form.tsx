@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
+import { BrandLogo } from "@/components/brand-logo";
 
 export default function AuthForm({ mode }: { mode: "login" | "register" }) {
   const router = useRouter();
@@ -48,7 +49,7 @@ export default function AuthForm({ mode }: { mode: "login" | "register" }) {
         <div className="auth-decoration-lines" />
       </div>
       <Link className="brand auth-brand" href="/">
-        <span>AgreeIt</span>
+        <BrandLogo />
       </Link>
       <section className="auth-card">
         <span className="eyebrow">{isRegister ? "GET STARTED" : "WELCOME BACK"}</span>

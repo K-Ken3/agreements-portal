@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { BrandLogo } from "@/components/brand-logo";
 
 const steps = [
   {
@@ -23,7 +24,7 @@ export default function HomePage() {
     <main>
       <header className="site-header">
         <Link className="brand" href="/" aria-label="AgreeIt home">
-          <span>AgreeIt</span>
+          <BrandLogo />
         </Link>
         <nav className="site-nav" aria-label="Main navigation">
           <a href="#how-it-works">How it works</a>
@@ -126,7 +127,7 @@ export default function HomePage() {
 
       <footer className="site-footer">
         <Link className="brand footer-brand" href="/">
-          <span>AgreeIt</span>
+          <BrandLogo />
         </Link>
         <span className="footer-copy">A clearer way to make agreements.</span>
         <div className="footer-links">

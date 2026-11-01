@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
+import { BrandLogo } from "@/components/brand-logo";
 
 type User = { legalName: string; email: string };
 type Agreement = {
@@ -76,7 +77,7 @@ export default function DashboardPage() {
     <main className="app-shell">
       <aside className="sidebar">
         <Link className="brand sidebar-brand" href="/">
-          <span>AgreeIt</span>
+          <BrandLogo />
         </Link>
         <span className="sidebar-label">WORKSPACE</span>
         <nav className="sidebar-nav" aria-label="Workspace">

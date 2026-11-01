@@ -7,7 +7,7 @@ Use the PowerShell commands in the repository README. The Docker Compose file st
 ## Production checklist
 
 1. Select the hosting, database, backup, logging, and object-storage regions only after reviewing Rwanda data protection and cross-border transfer requirements with qualified professionals.
-2. Set `DATABASE_URL`, `SESSION_SECRET`, and `APP_URL` using a managed secret store. Use a unique random session secret and HTTPS.
+2. Set `DATABASE_URL`, `SESSION_SECRET`, and the public app `APP_URL` using a managed secret store. Use a unique random session secret and HTTPS. `APP_URL` must be the URL invitees can open; it is distinct from the domain used for `EMAIL_FROM`. If omitted, Vercel's production deployment URL is used.
 3. Provision PostgreSQL with encrypted storage, least-privilege credentials, point-in-time recovery, monitoring, and tested restoration.
 4. Run reviewed Prisma migrations with `npm run db:deploy`.
 5. Build with `npm run build`; run `npm run typecheck` and `npm test` in CI.
@@ -18,7 +18,7 @@ No hosting platform, region, provider credentials, or deployment automation is s
 
 ## Vercel
 
-Vercel can build the Next.js application directly from the repository. Set `DATABASE_URL` (pooled serverless connection), `DIRECT_URL` (migration connection), `SESSION_SECRET`, and `APP_URL` in the project environment settings. The `postinstall` script generates the Prisma client.
+Vercel can build the Next.js application directly from the repository. Set `DATABASE_URL` (pooled serverless connection), `DIRECT_URL` (migration connection), `SESSION_SECRET`, and the public app `APP_URL` in the project environment settings. `APP_URL` must not be `localhost`; if omitted, the Vercel production URL is used. It is separate from the verified sender domain in `EMAIL_FROM`. The `postinstall` script generates the Prisma client.
 
 Apply migrations separately before the first deployment and after each reviewed migration. The current signing workflow requires the committed `agreement_signers` migrations:
 

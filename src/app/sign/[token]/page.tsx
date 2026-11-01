@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { FormEvent, useEffect, useState } from "react";
 import { useParams } from "next/navigation";
+import { BrandLogo } from "@/components/brand-logo";
 import type { AgreementParties } from "@/lib/agreement-types";
 
 type SigningAgreement = {
@@ -168,7 +169,7 @@ export default function SignAgreementPage() {
   return (
     <main className="signing-page">
       <header className="signing-header">
-        <Link className="brand" href="/"><span>AgreeIt</span></Link>
+        <Link className="brand" href="/"><BrandLogo /></Link>
         <span className="eyebrow">PRIVATE SIGNING INVITATION</span>
       </header>
       <section className="signing-content">

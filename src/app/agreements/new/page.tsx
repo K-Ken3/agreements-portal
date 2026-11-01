@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FormEvent, useEffect, useState } from "react";
 import { StepProgress } from "@/components/step-progress";
+import { BrandLogo } from "@/components/brand-logo";
 
 export default function NewAgreementPage() {
   const router = useRouter();
@@ -44,7 +45,7 @@ export default function NewAgreementPage() {
   return (
     <main className="app-shell">
       <aside className="sidebar">
-        <Link className="brand sidebar-brand" href="/dashboard"><span>AgreeIt</span></Link>
+        <Link className="brand sidebar-brand" href="/dashboard"><BrandLogo /></Link>
         <span className="sidebar-label">WORKSPACE</span>
         <nav className="sidebar-nav" aria-label="Workspace"><Link className="sidebar-link" href="/dashboard"><span>▦</span> Overview</Link><a className="sidebar-link active" href="#agreement-form"><span>＋</span> New agreement</a></nav>
         <div className="sidebar-bottom"><div className="sidebar-help"><span>i</span><div><strong>Start with the essentials</strong><small>You can refine your draft later</small></div></div></div>

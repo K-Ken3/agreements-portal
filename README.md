@@ -57,7 +57,7 @@ CI in [`.github/workflows/ci.yml`](./.github/workflows/ci.yml) applies the commi
    - `DATABASE_URL`: a hosted PostgreSQL connection string. Prefer the provider's pooled connection URL for serverless use.
    - `DIRECT_URL`: the direct/session connection string used by migrations.
    - `SESSION_SECRET`: a random value of at least 32 characters.
-   - `APP_URL`: the deployed URL, for example `https://your-project.vercel.app`.
+   - `APP_URL`: the public app URL used in signing links, for example `https://your-project.vercel.app` or your configured app domain. Do not set this to `http://localhost:3000` in production. If omitted on Vercel, the production deployment URL is used.
    - `RESEND_API_KEY`: Resend API key for counterparty invitations and verification codes.
    - `EMAIL_FROM`: verified sender email address, for example `agreements@example.com`.
 3. Apply the database migration once against the production database:

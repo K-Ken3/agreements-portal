@@ -17,7 +17,10 @@ const optionalEmail = z.preprocess(
 const envSchema = z.object({
   DATABASE_URL: z.string().url().or(z.string().min(1)),
   SESSION_SECRET: z.string().min(32),
-  APP_URL: z.string().url().default("http://localhost:3000"),
+  APP_URL: z.preprocess(
+    (value) => (value === "" ? undefined : value),
+    z.string().url().optional()
+  ),
   RESEND_API_KEY: optionalNonEmptyString,
   EMAIL_FROM: optionalEmail
 });

@@ -23,6 +23,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 
 .site-header { height: 82px; padding: 0 max(calc((100vw - 1200px) / 2), 5.2vw); display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #eff1ef; background: #fff; }
 .brand { display: inline-flex; align-items: center; gap: 10px; color: var(--navy); font-family: var(--font-display); font-size: 16px; font-weight: 800; letter-spacing: -.5px; }
+.brand-logo { display: block; width: 176px; height: auto; }
 .site-nav { display: flex; align-items: center; gap: 36px; margin-left: 60px; color: #57666e; font-size: 13px; font-weight: 600; }
 .site-nav a:hover, .footer-links a:hover { color: var(--teal); }
 .header-actions { display: flex; align-items: center; gap: 13px; }
@@ -98,6 +99,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 .disclaimer-band a { color: var(--teal); font-size: 11px; font-weight: 700; white-space: nowrap; }
 .site-footer { min-height: 94px; display: flex; align-items: center; gap: 18px; padding: 18px max(calc((100vw - 1200px) / 2), 5.2vw); border-top: 1px solid #edf0ed; }
 .footer-brand { font-size: 14px; }
+.footer-brand .brand-logo { width: 150px; }
 .footer-copy, .copyright { color: #9aa4a2; font-size: 10px; }
 .footer-links { display: flex; gap: 21px; margin-left: auto; color: #69767b; font-size: 10px; font-weight: 600; }
 .copyright { margin-left: 12px; }
@@ -108,6 +110,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 .auth-decoration-lines { position: absolute; bottom: -240px; left: -100px; width: 500px; height: 500px; border: 1px solid #e9efea; border-radius: 50%; box-shadow: 0 0 0 38px #f7f9f7, 0 0 0 39px #e9efea, 0 0 0 82px #f7f9f7, 0 0 0 83px #e9efea; }
 .auth-brand, .auth-card, .auth-back { position: relative; z-index: 1; }
 .auth-brand { margin: 3px 0 34px; }
+.auth-brand .brand-logo { width: 184px; }
 .auth-card { width: min(100%, 440px); padding: 36px 39px 31px; border: 1px solid #e6ebe8; border-radius: 12px; background: white; box-shadow: 0 12px 42px #29463a0a; }
 .auth-card h1 { margin: 13px 0 8px; color: #213945; font-family: var(--font-display); font-size: 25px; letter-spacing: -.8px; }
 .auth-intro { margin: 0 0 25px; color: #7b878c; font-size: 12px; line-height: 1.65; }
@@ -128,6 +131,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 .app-shell { min-height: 100vh; display: flex; background: #f7f8f7; }
 .sidebar { position: sticky; top: 0; width: 246px; height: 100vh; display: flex; flex: 0 0 246px; flex-direction: column; padding: 26px 17px 16px; border-right: 1px solid #e9edeb; background: #fff; }
 .sidebar-brand { padding: 0 9px 31px; font-size: 15px; }
+.sidebar-brand .brand-logo { width: 154px; }
 .sidebar-label { padding: 0 11px; color: #a1aaa8; font-size: 9px; font-weight: 700; letter-spacing: 1.25px; }
 .sidebar-nav { display: flex; flex-direction: column; gap: 4px; margin-top: 13px; }
 .sidebar-link { min-height: 40px; display: flex; align-items: center; gap: 12px; padding: 0 11px; border-radius: 6px; color: #69777a; font-size: 12px; font-weight: 600; }
@@ -333,6 +337,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 @media (max-width: 700px) {
   .site-header { height: 67px; padding: 0 18px; }
   .site-header .brand { font-size: 14px; }
+  .site-header .brand-logo { width: 148px; }
   .site-nav { display: none; }
   .header-actions { gap: 4px; }
   .header-actions .button { min-height: 36px; padding: 0 11px; font-size: 10px; }
@@ -368,6 +373,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
   .sidebar { position: relative; width: auto; height: auto; flex: none; padding: 12px 15px; border-right: 0; border-bottom: 1px solid #e9edeb; }
   .app-shell { display: block; }
   .sidebar-brand { padding: 0; }
+  .sidebar-brand .brand-logo { width: 132px; }
   .sidebar-label, .sidebar-nav, .sidebar-bottom { display: none; }
   .dashboard-topbar { height: 51px; padding: 0 17px; }
   .breadcrumbs { gap: 7px; font-size: 9px; }

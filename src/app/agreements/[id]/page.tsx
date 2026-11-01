@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { IssuerSignatureForm } from "@/components/issuer-signature-form";
+import { BrandLogo } from "@/components/brand-logo";
 import type { AgreementDetail } from "@/lib/agreement-types";
 
 function formatDay(value: string | null | undefined): string {
@@ -64,7 +65,7 @@ export default function AgreementDetailsPage() {
 
   return (
     <main className="app-shell">
-      <aside className="sidebar"><Link className="brand sidebar-brand" href="/dashboard"><span>AgreeIt</span></Link><span className="sidebar-label">WORKSPACE</span><nav className="sidebar-nav"><Link className="sidebar-link" href="/dashboard"><span>▦</span> Overview</Link><Link className="sidebar-link active" href="/dashboard#agreements"><span>▤</span> Agreements</Link></nav></aside>
+      <aside className="sidebar"><Link className="brand sidebar-brand" href="/dashboard"><BrandLogo /></Link><span className="sidebar-label">WORKSPACE</span><nav className="sidebar-nav"><Link className="sidebar-link" href="/dashboard"><span>▦</span> Overview</Link><Link className="sidebar-link active" href="/dashboard#agreements"><span>▤</span> Agreements</Link></nav></aside>
       <section className="dashboard-main">
         <header className="dashboard-topbar"><div className="breadcrumbs"><Link href="/dashboard">Workspace</Link><span>/</span><Link href="/dashboard#agreements">Agreements</Link><span>/</span><strong>Details</strong></div><Link className="button button-quiet" href="/dashboard"><span aria-hidden="true">←</span> Back to workspace</Link></header>
         <div className="details-content">
